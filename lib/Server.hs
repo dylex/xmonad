@@ -11,7 +11,7 @@ import qualified XMonad.StackSet as W
 import Data.Array
 import Data.Monoid (All(..))
 import Util
-import Global
+import Param
 
 type ServerCall = [Int] -> X ()
 
@@ -22,7 +22,7 @@ data ServerCommand
 
 commandFunctions :: Array ServerCommand ServerCall
 commandFunctions = array rangeOf
-  [(ServerCommandView,	\(i:_) -> windows $ W.view $ show $ Desktop i)
+  [(ServerCommandView,	\(i:_) -> windows $ W.view $ show (toEnum i :: Desktop))
   ,(ServerCommandFocus,	\(i:_) -> windows $ W.focusWindow $ ii i)]
 
 both :: (a -> b) -> (a,a) -> (b,b)

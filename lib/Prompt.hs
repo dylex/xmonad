@@ -18,8 +18,9 @@ import qualified Data.Set as Set
 import System.Directory
 import System.FilePath
 import Util
-import Global
-import Command
+import Param
+import Ops
+import Program
 import Completer
 
 readFile' :: String -> IO String
@@ -115,7 +116,7 @@ runInTerm :: ShellCommand -> X ()
 runInTerm c = runTerm $ term{ termTitle = Just (output c), termHold = True, termRun = Just (shellCommandRun c) }
 
 runProg :: Either String ShellCommand -> X ()
-runProg (Left p) = spawnl $ fromJust $ lookup p programs
+runProg (Left p) = run $ fromJust $ lookup p programs
 runProg (Right c) = run (shellCommandRun c)
 
 
@@ -129,10 +130,7 @@ loginHost = suggest . oneOf =.< mapMaybe hostLine . lines =.< readFile' (home ++
 promptLogin :: XPConfig -> X ()
 promptLogin x = do
   c <- io $ loginHost
-  prompt x "ssh" c login
-
-login :: String -> X ()
-login h = runTerm $ term{ termTitle = Just h, termRun = Just (RunShell ("ssh " ++ h)) }
+  prompt x "ssh" c runLogin
 
 
 instance Output Desktop

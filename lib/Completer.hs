@@ -126,6 +126,7 @@ instance Monoid (Completer a) where
   mappend = liftC2 mappend
 
 instance Nullable (Completer a) where
+  isNull = error "isNull Completer"
   nnull = mempty
   coalesce = liftC2 coalesce
 

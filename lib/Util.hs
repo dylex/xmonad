@@ -13,31 +13,14 @@ module Util
   , partitionElems, partitionM
   , concatMapM
   , Nullable(..)
-
-  , isElem
-  , hostName
-  , home
-  , isExec
-  , shellEscape
-  , Run(..), unRun, run
-  , spawnp, spawnl
-  , warpFocus
-  , COLOR
-  , debug
+  , getHostName
   ) where
 
 import Control.Arrow
 import Control.Monad
-import Control.Monad.Trans
 import Data.Maybe
 import qualified Foreign.C as C
 import qualified Foreign.Marshal.Array
-import qualified System.Directory
-import System.Environment
-import System.IO.Unsafe
-import XMonad.Core as X
-import qualified XMonad.Actions.Warp as XWarp
-import qualified XMonad.Util.Run as XRun
 
 ii :: (Integral a, Integral b) => a -> b
 ii = fromIntegral
@@ -112,9 +95,6 @@ instance Nullable [a] where
   nnull = []
   isNull = null
 
-isElem :: Eq a => Query a -> [a] -> Query Bool
-isElem q l = fmap (`elem` l) q
-
 foreign import ccall unsafe "gethostname" c_gethostname :: C.CString -> C.CSize -> IO C.CInt
 getHostName :: IO String
 getHostName = Foreign.Marshal.Array.allocaArray0 len $ \s -> do
@@ -122,44 +102,3 @@ getHostName = Foreign.Marshal.Array.allocaArray0 len $ \s -> do
   C.peekCString s
   where len = 256
 
-hostName :: String
-hostName = unsafePerformIO getHostName
-
-home :: String
-home = unsafePerformIO $ getEnv "HOME"
-
-isExec :: String -> Bool
-isExec = unsafePerformIO . (liftM isJust) . System.Directory.findExecutable 
-
-shellEscape :: String -> String
-shellEscape "" = ""
-shellEscape (c:s) 
-  | c `elem` " !\"#$&'()*;<>?@[\\]`{|}" = '\\':c:shellEscape s
-  | otherwise = c:shellEscape s
-
-data Run 
-  = Run String [String]
-  | RunShell String
-
-unRun :: Run -> [String]
-unRun (Run p a) = p:a
-unRun (RunShell c) = ["sh","-c",c]
-
-run :: MonadIO m => Run -> m ()
-run (Run p a) = XRun.safeSpawn p a
-run (RunShell c) = XRun.unsafeSpawn c
-
-spawnp :: MonadIO m => String -> m ()
-spawnp p = run $ Run p []
-
-spawnl :: MonadIO m => [String] -> m ()
-spawnl [] = nop
-spawnl (p:a) = run $ Run p a
-
-warpFocus :: X ()
-warpFocus = XWarp.warpToWindow 0.5 0.5
-
-type COLOR = String
-
-debug :: Show a => a -> a
-debug x = unsafePerformIO (trace (show x)) `seq` x

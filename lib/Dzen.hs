@@ -8,8 +8,8 @@ module Dzen
 
 import System.IO
 import XMonad.Util.Run
-import Util
-import Global
+import Param
+import Ops
 import Server
 
 dzenDefaultArgs :: [String]

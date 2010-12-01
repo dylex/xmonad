@@ -12,7 +12,7 @@ import Data.List
 import qualified Data.Map as Map
 import System.IO
 import Util
-import Global
+import Param
 import Server
 import Dzen
 
