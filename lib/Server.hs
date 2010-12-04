@@ -8,25 +8,29 @@ module Server
 
 import XMonad
 import qualified XMonad.StackSet as W
-import Data.Array
 import Data.Monoid (All(..))
 import Util
 import Param
+import Ops
+import Prompt
 
 type ServerCall = [Int] -> X ()
 
 data ServerCommand 
-  = ServerCommandView -- [workspace index]
-  | ServerCommandFocus -- [window id]
-  deriving (Eq, Ord, Enum, Ix, Bounded)
+  = ServerCommandView -- workspace index
+  | ServerCommandFocus -- window id
+  | ServerCommandShift -- window id[,desktop id]
+  | ServerCommandWindowMenu -- window id
+  deriving (Show, Eq, Ord, Enum, Bounded)
 
-commandFunctions :: Array ServerCommand ServerCall
-commandFunctions = array rangeOf
-  [(ServerCommandView,	\(i:_) -> windows $ W.view $ show (toEnum i :: Desktop))
-  ,(ServerCommandFocus,	\(i:_) -> windows $ W.focusWindow $ ii i)]
-
-both :: (a -> b) -> (a,a) -> (b,b)
-both f (x,y) = (f x, f y)
+serverCommand :: ServerCommand -> ServerCall
+serverCommand ServerCommandView (d:_) = windows $ viewDesk $ const $ toEnum d
+serverCommand ServerCommandFocus (w:_) = windows $ W.focusWindow $ ii w
+serverCommand ServerCommandShift (w:d:_) = do
+  ds <- maybe (withWindowSet $ return . W.currentTag) (return . show) (toEnumMaybe d :: Maybe Desktop)
+  windows $ W.shiftWin ds $ ii w
+serverCommand ServerCommandWindowMenu (w:_) = promptWindowOp $ ii w
+serverCommand c a = trace $ "Bad arguments to " ++ show c ++ ": " ++ show a
 
 serverCommandType :: String
 serverCommandType = "XMONAD_COMMAND"
@@ -38,8 +42,7 @@ getServerCommandType = do
 
 serverEventHook :: Atom -> Event -> X All
 serverEventHook ct (ClientMessageEvent{ ev_message_type = t, ev_data = cmd:args }) | t == ct = do
-  if inRange (both fromEnum $ bounds commandFunctions) icmd
-    then (commandFunctions ! toEnum icmd) (map ii args) >. All False
-    else trace ("Unknown " ++ serverCommandType ++ ": " ++ show cmd) >. All True
-  where icmd = ii cmd
+  case toEnumMaybe (ii cmd) of
+    Just c -> serverCommand c (map ii args) >. All False
+    _ -> trace ("Unknown " ++ serverCommandType ++ ": " ++ show cmd) >. All True
 serverEventHook _ _ = return (All True)

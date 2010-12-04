@@ -31,11 +31,6 @@ readDir' dots "" = readDir' dots "."
 readDir' False d = filter (('.' /=) . head) =.< readDir' True d
 readDir' True d = getDirectoryContents d `catch` \_ -> return []
 
-readMaybe :: Read a => String -> Maybe a
-readMaybe s = case reads s of
-  [(x,"")] -> Just x
-  _ -> Nothing
-
 breakLast :: (a -> Bool) -> [a] -> ([a], [a])
 breakLast f s = fromMaybe ([],s) $ bl s where
   bl [] = Nothing
@@ -69,6 +64,16 @@ instance XPrompt Prompt where
   commandToComplete _ c = c
   nextCompletion _ = getNextCompletion
 
+xpConfig :: XPConfig
+xpConfig = defaultXPConfig
+  { bgColor = "#cccccc"
+  , fgColor = "#000000"
+  , bgHLight = "#000000"
+  , fgHLight = "#ffffcc"
+  , borderColor = "#0000cc"
+  , showCompletionOnTab = False
+  }
+
 unknown :: Output a => a -> X ()
 unknown _ = withDisplay (io . (`bell` 100))
 
@@ -81,8 +86,8 @@ _tryInput f i = tryMaybe i f $ input i
 tryAccept :: Output a => (a -> X ()) -> Completer a -> String -> X ()
 tryAccept f c s = tryMaybe s f =<< io (accept c s)
 
-prompt :: Output a => XPConfig -> String -> Completer a -> (a -> X ()) -> X ()
-prompt x p c f = mkXPrompt (Prompt p) x (complFunction c) $ tryAccept f c
+prompt :: Output a => String -> Completer a -> (a -> X ()) -> X ()
+prompt p c f = mkXPrompt (Prompt p) xpConfig (complFunction c) $ tryAccept f c
 
 
 filePath :: CS
@@ -102,12 +107,12 @@ shellCommand = do
       arg = anything -- TODO
   return $ wordPair (word1 cmd) arg
 
-promptRun :: XPConfig -> Bool -> X ()
-promptRun x t = do
+promptRun :: Bool -> X ()
+promptRun t = do
   cmd <- io shellCommand
   if t 
-    then prompt x "run" cmd runInTerm
-    else prompt x "run" (oneOf (map fst programs) `eitherOr` cmd) runProg
+    then prompt "run" cmd runInTerm
+    else prompt "run" (oneOf (map fst programs) `eitherOr` cmd) runProg
 
 shellCommandRun :: ShellCommand -> Run
 shellCommandRun = RunShell . output
@@ -127,10 +132,10 @@ loginHost = suggest . oneOf =.< mapMaybe hostLine . lines =.< readFile' (home ++
     , '*' `notElem` h && '?' `notElem` h = Just h
     | otherwise = Nothing
 
-promptLogin :: XPConfig -> X ()
-promptLogin x = do
+promptLogin :: X ()
+promptLogin = do
   c <- io $ loginHost
-  prompt x "ssh" c runLogin
+  prompt "ssh" c runLogin
 
 
 instance Output Desktop
@@ -166,18 +171,18 @@ type OpClosure = Closure (X ())
 
 ops :: Maybe NamedWindow -> X (Completer (Words Op OpClosure))
 ops defw = do
-  window <- maybe (fmap Just =.< window) (const $ return $ return Nothing) defw
+  win <- maybe (fmap Just =.< window) (const $ return $ return Nothing) defw
   defd <- W.currentTag =.< gets windowset
   let
     op n c f = (Op n (f Nothing), completeClosure c (f . Just))
     o_ n (f :: X ()) = 
       op n nop (const f)
     ow n (f :: Window -> X ()) = 
-      op n window (xw f)
+      op n win (xw f)
     od n (f :: WorkspaceId -> X ()) =
       op n desktop (xd f)
     odw n (f :: WorkspaceId -> Window -> X ()) = 
-      op n (word1 desktop `wordPair` window) (xdw f)
+      op n (word1 desktop `wordPair` win) (xdw f)
 
     xw f w = maybe (withFocused f) f $ fmap unName $ join w `coalesce` defw
     xd f = f . fromMaybe defd . fmap show
@@ -190,6 +195,7 @@ ops defw = do
     ,ow "unmanage"	unmanage
     ,ow "kill"		killWindow
     ,ow "hide"		hide
+    ,ow "icon"		$ windows . W.shiftWin iconWorkspace
     ,ow "reveal"	reveal
     ,ow "focus"		$ windows . W.focusWindow
     ,ow "xfocus"	setFocusX
@@ -203,16 +209,16 @@ ops defw = do
     ,ow "ident"		identWindow
     ]
 
-promptOp :: XPConfig -> X ()
-promptOp x = do
+promptOp :: X ()
+promptOp = do
   o <- ops Nothing
-  prompt x "" o runOp
+  prompt "" o runOp
 
-promptWindowOp :: XPConfig -> Window -> X ()
-promptWindowOp x w = do
+promptWindowOp :: Window -> X ()
+promptWindowOp w = do
   nw <- getName w
   o <- ops (Just nw)
-  prompt x (show nw) o runOp
+  prompt (show nw) o runOp
 
 runOp :: (Words Op OpClosure) -> X ()
 runOp (Words (Op _ f) Nothing) = f

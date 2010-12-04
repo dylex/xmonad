@@ -1,5 +1,5 @@
 {-# OPTIONS -Wall #-}
-{-# LANGUAGE PatternGuards, ForeignFunctionInterface #-}
+{-# LANGUAGE PatternGuards, ForeignFunctionInterface, ScopedTypeVariables #-}
 module Util 
   ( first, second
   , ii
@@ -13,14 +13,13 @@ module Util
   , partitionElems, partitionM
   , concatMapM
   , Nullable(..)
-  , getHostName
+  , readMaybe
+  , toEnumMaybe
   ) where
 
 import Control.Arrow
 import Control.Monad
 import Data.Maybe
-import qualified Foreign.C as C
-import qualified Foreign.Marshal.Array
 
 ii :: (Integral a, Integral b) => a -> b
 ii = fromIntegral
@@ -95,10 +94,12 @@ instance Nullable [a] where
   nnull = []
   isNull = null
 
-foreign import ccall unsafe "gethostname" c_gethostname :: C.CString -> C.CSize -> IO C.CInt
-getHostName :: IO String
-getHostName = Foreign.Marshal.Array.allocaArray0 len $ \s -> do
-  C.throwErrnoIfMinus1_ "getHostName" $ c_gethostname s (fromIntegral len)
-  C.peekCString s
-  where len = 256
+readMaybe :: Read a => String -> Maybe a
+readMaybe s = case reads s of
+  [(x,"")] -> Just x
+  _ -> Nothing
 
+toEnumMaybe :: forall a . (Enum a, Bounded a) => Int -> Maybe a
+toEnumMaybe x 
+  | x >= fromEnum (minBound :: a) && x <= fromEnum (maxBound :: a) = Just (toEnum x)
+  | otherwise = Nothing

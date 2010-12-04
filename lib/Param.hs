@@ -1,41 +1,44 @@
 {-# OPTIONS -Wall #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Param
-  ( hostIs, hostHome
+  ( osName
+  , hostName, hostHome
   , home
   , Desktop, desktops, desktopIds
+  , iconWorkspace
   , topHeight
   , wmod
   , COLOR
   , colorFG, colorBG
   , colorRootFG
+  , pagerWidth, pagerDeskWidth
   , isExec
   , isFont
   ) where
 
 import XMonad as X hiding (terminal)
 import Data.Ix
-import Data.List
 import Data.Maybe
 import qualified System.Directory
 import System.Environment
 import System.IO.Unsafe
+import System.Posix.Unistd
 import Util
 
+systemID :: SystemID
+systemID = unsafePerformIO getSystemID
+
+osName :: String
+osName = systemName systemID
+
 hostName :: String
-hostName = unsafePerformIO getHostName
+hostName = takeWhile (/= '.') $ nodeName systemID
+
+hostHome :: Bool
+hostHome = hostName == "datura"
 
 home :: String
 home = unsafePerformIO $ getEnv "HOME"
-
-hostIs :: String -> Bool
-hostIs s = case stripPrefix s hostName of
-  Just "" -> True
-  Just ('.':_) -> True
-  _ -> False
-
-hostHome :: Bool
-hostHome = hostIs "datura"
 
 newtype Desktop = Desktop { unDesktop :: Int } deriving (Eq, Ord, Enum, Ix)
 instance Show Desktop where showsPrec n = showsPrec n . unDesktop
@@ -49,6 +52,9 @@ desktops = allOf
 
 desktopIds :: [WorkspaceId]
 desktopIds = map show desktops -- assumed to be sorted
+
+iconWorkspace :: WorkspaceId  -- TODO: incorporate above?
+iconWorkspace = "icon"
 
 topHeight :: Int
 topHeight = 50
@@ -66,6 +72,12 @@ colorBG = "#8080AA"
 
 colorRootFG :: COLOR
 colorRootFG = "#FFFFBB"
+
+pagerDeskWidth :: Int
+pagerDeskWidth = 75
+
+pagerWidth :: Int
+pagerWidth = pagerDeskWidth*length desktops
 
 isExec :: String -> Bool
 isExec = unsafePerformIO . (isJust .=< System.Directory.findExecutable)

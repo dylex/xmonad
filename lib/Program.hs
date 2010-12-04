@@ -7,6 +7,7 @@ module Program
   , runLogin
   , startups
   , programs
+  , mixerSet
   ) where
 
 import XMonad as X hiding (terminal)
@@ -15,7 +16,6 @@ import System.IO
 import Util
 import Param
 import Ops
-import Pager
 
 data Term = Term 
   { terminal :: String
@@ -73,7 +73,7 @@ startups = l pagerWidth where
     [ ("stuck term", Run "xterm" ["-title","stuck term","-fn","-*-proggytiny-medium-*","-fb","-*-proggytiny-bold-*"{-,"-fn","6x10","-fb","6x10"-}])
     , ("xset", Run "xset" ["b","100","3520",show (if hostHome then 20 else 35 :: Int),"m","3","5","r","rate","250","30","s","0","+dpms","dpms","300","0","900"])
     ] 
---    ++ guard1 (isExec "xbg") ["xbg"]
+--    ++ guard1 (isExec "xbg") ("xbg", Run "xbg" [])
   push w f r x = f ('+' : show x) : r x' where x' = x+w
   geom w f = push w (f . g) where
     g x = show w ++ "x" ++ show topHeight ++ x ++ "+0"
@@ -101,3 +101,12 @@ programs = startups
     | isExec p = [(p, Run p a)]
     | otherwise = []
 
+mixerSet :: MonadIO m => Ordering -> Int -> m ()
+mixerSet d n 
+  | osName == "Linux" = spawnl ["amixer","-q","-D","main","set","Master",show n ++ dirSign d]
+  | osName == "FreeBSD" = spawnl ["/usr/sbin/mixer",if hostName == "druid" then "ogain" else "vol",dirSign d ++ show n]
+  | otherwise = nop
+  where
+  dirSign LT = "-"
+  dirSign EQ = "%"
+  dirSign GT = "+"

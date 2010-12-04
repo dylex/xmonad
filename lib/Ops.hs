@@ -1,5 +1,5 @@
 {-# OPTIONS -Wall #-}
-{-# LANGUAGE PatternGuards #-}
+{-# LANGUAGE PatternGuards, FlexibleContexts #-}
 module Ops
   ( debug
   , isElem
@@ -9,11 +9,16 @@ module Ops
   , warpFocus
   , stickWindow
   , switchWindow
+  , viewDesk, shiftDesk
+  , succWrap, predWrap
+  , replaceWorkspaceLayout
   ) where
 
 import Control.Monad.Trans
+import Data.Maybe
 import System.IO.Unsafe
 import XMonad as X
+import qualified XMonad.StackSet as W
 import qualified XMonad.Actions.CopyWindow as XCW
 import qualified XMonad.Actions.Warp as XWarp
 import qualified XMonad.Util.Run as XRun
@@ -60,3 +65,27 @@ stickWindow w s = foldr (XCW.copyWindow w) s desktopIds
 
 switchWindow :: Window -> X ()
 switchWindow = sendMessage . SwitchWindow
+
+withDesk :: (WorkspaceId -> WindowSet -> WindowSet) -> (Desktop -> Desktop) -> WindowSet -> WindowSet
+withDesk f g ws = f (show $ g $ fromMaybe minBound $ readMaybe $ W.currentTag ws) ws
+
+viewDesk :: (Desktop -> Desktop) -> WindowSet -> WindowSet
+viewDesk = withDesk W.greedyView
+
+shiftDesk :: (Desktop -> Desktop) -> WindowSet -> WindowSet
+shiftDesk = withDesk W.shift
+  
+succWrap, predWrap :: (Enum a, Eq a, Bounded a) => a -> a
+succWrap x
+  | x == maxBound = minBound
+  | otherwise = succ x
+predWrap x
+  | x == minBound = maxBound
+  | otherwise = pred x
+
+replaceWorkspaceLayout :: (LayoutClass l Window, Read (l Window)) => WorkspaceId -> l Window -> WindowSet -> WindowSet
+replaceWorkspaceLayout w l = W.mapWorkspace m where
+  m ws 
+    | W.tag ws == w = ws{ W.layout = Layout l }
+    | otherwise = ws
+
