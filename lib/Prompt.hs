@@ -1,4 +1,4 @@
-{-# OPTIONS -Wall -fno-warn-orphans #-}
+{-# OPTIONS -fno-warn-orphans #-}
 {-# LANGUAGE PatternGuards, MultiParamTypeClasses, TypeSynonymInstances, FlexibleInstances, FlexibleContexts, ScopedTypeVariables, ExistentialQuantification, StandaloneDeriving #-}
 module Prompt
   ( promptRun

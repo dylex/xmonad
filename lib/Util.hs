@@ -1,4 +1,3 @@
-{-# OPTIONS -Wall #-}
 {-# LANGUAGE PatternGuards, ForeignFunctionInterface, ScopedTypeVariables #-}
 module Util 
   ( first, second

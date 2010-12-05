@@ -1,4 +1,3 @@
-{-# OPTIONS -Wall #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Param
   ( osName
@@ -65,7 +64,7 @@ topHeight :: Int
 topHeight = 50
 
 wmod :: KeyMask
-wmod = mod1Mask -- mod4Mask
+wmod = mod4Mask -- mod1Mask
 
 type COLOR = String
 

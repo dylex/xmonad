@@ -1,4 +1,3 @@
-{-# OPTIONS -Wall #-}
 module Server
   ( ServerCommand(..)
   , serverEventHook

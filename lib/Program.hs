@@ -1,4 +1,3 @@
-{-# OPTIONS -Wall #-}
 module Program
   ( Term(..), term, runTerm
   , notify
@@ -60,10 +59,10 @@ runLogin h = runTerm $ term{ termTitle = Just h, termRun = Just (RunShell ("ssh 
 startups :: [(String, Run)]
 startups = l pagerWidth where
   l = lif (isExec "xeyes")
-      (geom topHeight $ \g -> ("xeyes", nice ["xeyes","-distance","-geometry",g]))
---    $ (if isExec "stripchart"
---	then geom 360 $ \g -> ("stripchart", nice ["-8","stripchart","--geometry",g])
---	else geom 120 $ \g -> ("xload", nice ["-8","xload","-bg","#3050A0","-fg","#F0E000","-nolabel","-update","30","-geometry",g]))
+      (push (topHeight+1) $ \x -> ("xeyes", nice ["xeyes","-distance","-geometry",show topHeight++"x"++show topHeight++x++"+-1"]))
+    $ (if isExec "stripchart"
+	then geom 360 $ \g -> ("stripchart", nice ["-8","stripchart","--geometry",g])
+	else geom 120 $ \g -> ("xload", nice ["-8","xload","-bg","#3050A0","-fg","#F0E000","-nolabel","-update","30","-geometry",g]))
     $ lif (isExec "xdaliclock")
       (geom 220 $ \g -> ("xdaliclock", nice ["-5","xdaliclock","-transparent","-hex","-noseconds","-fg",colorRootFG,"-fn","-*-luxi sans-medium-r-*-*-*-400-*-*-*-*-iso8859-1","-geometry",g]))
     $ lif hostHome

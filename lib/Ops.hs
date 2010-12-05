@@ -1,4 +1,3 @@
-{-# OPTIONS -Wall #-}
 {-# LANGUAGE PatternGuards, FlexibleContexts #-}
 module Ops
   ( debug
@@ -11,7 +10,6 @@ module Ops
   , switchWindow
   , viewDesk, shiftDesk
   , succWrap, predWrap
-  , replaceDesktopLayout
   ) where
 
 import Control.Monad.Trans
@@ -82,10 +80,4 @@ succWrap x
 predWrap x
   | x == minBound = maxBound
   | otherwise = pred x
-
-replaceDesktopLayout :: (LayoutClass l Window, Read (l Window)) => Desktop -> l Window -> WindowSet -> WindowSet
-replaceDesktopLayout w l = W.mapWorkspace m where
-  m ws 
-    | W.tag ws == show w = ws{ W.layout = Layout l }
-    | otherwise = ws
 

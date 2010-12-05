@@ -1,4 +1,3 @@
-{-# OPTIONS -Wall #-}
 {-# LANGUAGE PatternGuards, FlexibleContexts #-}
 import XMonad as X hiding (mouseResizeWindow)
 import qualified XMonad.StackSet as W
@@ -6,8 +5,9 @@ import qualified XMonad.Actions.CopyWindow as XCW
 import XMonad.Actions.CycleWS
 import XMonad.Actions.FlexibleResize
 import XMonad.Layout.Column
-import XMonad.Layout.Gaps
+import XMonad.Layout.NoBorders
 import XMonad.Util.Run
+import XMonad.Util.Types
 import XMonad.Util.WindowProperties
 import Control.Concurrent.MVar
 import Control.Monad
@@ -29,19 +29,17 @@ import Prompt
 isStuck :: Property
 isStuck = Title "stuck term"
 
-layoutGap = gaps [(U,topHeight)]
-
-layout = layoutGap $ splitLayout (R, 2+80*6) isStuck lmain lstuck
+layout = smartBorders $ splitLayout (R, 8+80*6) isStuck lmain lstuck
   where
   lmain = Full
   lstuck = Column 1
 
-iconLayout = layoutGap $ Tall 1 0 (1%2)
+iconLayout = Tall 1 0 (1%2)
 
 manager :: ManageHook
 manager = composeAll
-  [ isElem title ["Stripchart","xeyes","xload","xdaliclock","xrtail"] --> doIgnore
-  , isElem className ["feh"] <||> isElem title ["Event Tester"] --> doFloat
+  [ isElem title ["Stripchart","xeyes","xload","xdaliclock","Dali Clock","xrtail"] --> doIgnore
+  , isElem className ["feh"] <||> isElem title ["Event Tester","MPlayer"] --> doFloat
   , propertyToQuery isStuck --> ask >>= doF . stickWindow
   ]
 
@@ -64,6 +62,7 @@ bind =
   , ((wmod .|. shiftMask,   xK_r),	promptRun False)
   , ((wmod,		    xK_l),	runTerm term)
   , ((wmod .|. shiftMask,   xK_l),	promptLogin)
+  , ((wmod .|. controlMask, xK_l),	setLayout (Layout layout) >> refresh)
   -- xK_slash
   -- xK_equal
   -- xK_backslash
@@ -149,7 +148,7 @@ mouse = --map (\(mb, rf, wf) -> (mb, \w -> isRoot w >>= \r -> if r then rf else 
 
 startup :: Bool -> X ()
 startup new = do
-  windows $ replaceDesktopLayout iconDesktop iconLayout
+  updateLayout (show iconDesktop) $ Just $ Layout $ iconLayout
   when new $ mapM_ (run . snd) startups
 
 main :: IO ()
@@ -158,7 +157,7 @@ main = do
   let new = "--resume" `notElem` args
   pagerLog <- pagerStart
   sct <- newEmptyMVar
-  xmonad $ defaultConfig
+  xmonad $ XConfig
     { normalBorderColor = colorBG
     , focusedBorderColor = colorFG
     , X.terminal = Program.terminal term
@@ -166,9 +165,11 @@ main = do
     , manageHook = manager
     , handleEventHook = \e -> io (readMVar sct) >>= \c -> serverEventHook c e
     , X.workspaces = map show desktopsAll
+    , numlockMask = mod2Mask
     , modMask = wmod
     , keys = const $ Map.fromList bind
     , mouseBindings = const $ Map.fromList mouse
+    , borderWidth = 1
     , logHook = pagerLog
     , startupHook = getServerCommandType >>= io . tryPutMVar sct >> startup new
     , focusFollowsMouse = True
@@ -181,7 +182,11 @@ main = do
  -   menus
  -   main layouts
  -   floating/layering: in layout
- -   better resize
+ -   better resize/move: display size
+ -   resize issues: mrxvt/firefox start wrong size
+ -   mrxvt refresh
+ -   mrxvt setting ICON_NAME not NAME?
  -   mpc/dzen status
+ -   exec dzen
  -   transparent/root dzen
  -}

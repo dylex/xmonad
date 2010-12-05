@@ -1,4 +1,4 @@
-{-# OPTIONS -Wall -fno-warn-name-shadowing #-}
+{-# OPTIONS -fno-warn-name-shadowing #-}
 {-# LANGUAGE TypeSynonymInstances, MultiParamTypeClasses, FlexibleContexts, DeriveDataTypeable, PatternGuards #-}
 module Layout
   ( splitLayout
@@ -11,6 +11,7 @@ import XMonad.Util.Types
 import XMonad.Util.WindowProperties
 import Data.Maybe
 import Util
+import Param
 
 -- based on ComboP
 data SplitLayout lm ls a = SplitLayout 
@@ -31,11 +32,17 @@ splitLayout (d, z) p lm ls = SplitLayout d z p lm ls [] []
 half :: Rational
 half = 0.5
 
+gaps :: Rectangle -> Rectangle
+gaps (Rectangle x y w h) = Rectangle (x+1) (y+ii topHeight) (w-2) (h-ii topHeight-1)
+
+shrinkBy :: Dimension -> Rectangle -> Rectangle
+shrinkBy i (Rectangle x y w h) = Rectangle (x+ii i) (y+ii i) (w-2*i) (h-2*i)
+
 splitRect :: (Direction2D, Dimension) -> Rectangle -> (Rectangle, Rectangle)
-splitRect (R, n) r | n > 0 && n < t = (r{ rect_width  = t - n }, r{ rect_x = rect_x r + ii (t - n), rect_width  = n }) where t = rect_width r
-splitRect (L, n) r | n > 0 && n < t = (r{ rect_width  = t - n,      rect_x = rect_x r + ii n },  r{ rect_width  = n }) where t = rect_width r
-splitRect (D, n) r | n > 0 && n < t = (r{ rect_height = t - n }, r{ rect_y = rect_y r + ii (t - n), rect_height = n }) where t = rect_height r
-splitRect (U, n) r | n > 0 && n < t = (r{ rect_height = t - n,      rect_y = rect_y r + ii n },  r{ rect_height = n }) where t = rect_height r
+splitRect (R, n) (Rectangle x y w h) | n > 0 && n < w = (Rectangle x        y (w-n) h, Rectangle (x+ii (w-n)) y n h)
+splitRect (L, n) (Rectangle x y w h) | n > 0 && n < w = (Rectangle (x+ii n) y (w-n) h, Rectangle x            y n h)
+splitRect (D, n) (Rectangle x y w h) | n > 0 && n < h = (Rectangle x        y w (h-n), Rectangle x (y+ii (h-n)) w n)
+splitRect (U, n) (Rectangle x y w h) | n > 0 && n < h = (Rectangle x (y+ii n) w (h-n), Rectangle x            y w n)
 splitRect (R, _) r = splitVerticallyBy half r
 splitRect (L, _) r = swap $ splitVerticallyBy half r
 splitRect (D, _) r = splitHorizontallyBy half r
@@ -68,20 +75,21 @@ instance (LayoutClass lm Window, LayoutClass ls Window) => LayoutClass (SplitLay
     (ss,sm) <- partitionStackM assignWindow s
     let
       (rm, rs) 
-	| isNothing ss = (r, r)
-	| otherwise = splitRect (splitDirection l, splitSize l) r
+	| isNothing ss = (r', r')
+	| otherwise = splitRect (splitDirection l, splitSize l) r'
     (wrm, lm) <- runLayout (Workspace (wid ++ "M") (splitMain l) sm) rm
     (wrs, ls) <- runLayout (Workspace (wid ++ "S") (splitSub  l) ss) rs
-    return (wrm ++ wrs, Just l
+    return (map (second $ shrinkBy 1) $ wrm ++ wrs, Just l
       { splitMain = fromMaybe (splitMain l) lm
       , splitSub  = fromMaybe (splitSub  l) ls
       , splitMains = maybe [] integrate sm
-      , splitSubs = maybe [] integrate ss
+      , splitSubs  = maybe [] integrate ss
       })
     where
+    r' = gaps r
     assignWindow w
       | w `elem` splitMains l = return False
-      | w `elem` splitSubs l = return True
+      | w `elem` splitSubs  l = return True
       | otherwise = hasProperty (splitProp l) w
 
   handleMessage l m

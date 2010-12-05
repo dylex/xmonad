@@ -1,4 +1,3 @@
-{-# OPTIONS -Wall #-}
 module Pager 
   ( pagerStart
   ) where
