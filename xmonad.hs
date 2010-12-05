@@ -16,6 +16,7 @@ import Data.Ratio ((%))
 import System.Environment
 import System.Exit
 import Graphics.X11.ExtraTypes.XF86
+import Util
 import Param
 import Ops
 import Layout
@@ -23,16 +24,19 @@ import Pager
 import Server
 import Program
 import Prompt
+--import Selection
 
 isStuck :: Property
 isStuck = Title "stuck term"
 
-layout = gaps [(U,topHeight)] $ splitLayout (R, 2+80*6) isStuck lmain lstuck
+layoutGap = gaps [(U,topHeight)]
+
+layout = layoutGap $ splitLayout (R, 2+80*6) isStuck lmain lstuck
   where
   lmain = Full
   lstuck = Column 1
 
-iconLayout = Tall 1 0 (1%2)
+iconLayout = layoutGap $ Tall 1 0 (1%2)
 
 manager :: ManageHook
 manager = composeAll
@@ -50,6 +54,7 @@ bind =
   -- xK_comma
   -- xK_period
   -- xK_p
+  --, ((wmod,		    xK_p),	withSelection trace)
   -- xK_y
   , ((wmod,		    xK_f),	runBrowser Nothing)
   --, ((wmod,		    xK_g),	runTerm term{ termRun = Just (Run "elinks") })
@@ -79,7 +84,7 @@ bind =
   , ((wmod .|. shiftMask,   xK_s),	windows $ shiftDesk predWrap)
   , ((wmod,		    xK_minus),	toggleWS)
   , ((wmod .|. shiftMask,   xK_minus),	withFocused (sendMessage . SwitchWindow))
-  , ((wmod,		    xK_Return),	windows (W.view (head desktopIds)))
+  , ((wmod,		    xK_Return),	windows $ W.view $ show $ head desktops)
 
   , ((wmod,		    xK_semicolon), spawn ((if hostHome then "" else "xlock && ") ++ "sleep 2 && xset dpms force off"))
   , ((wmod .|. shiftMask,   xK_semicolon), promptOp)
@@ -92,7 +97,7 @@ bind =
   , ((wmod .|. shiftMask,   xK_m),	withFocused (windows . W.sink))
   , ((wmod,		    xK_w),	windows W.shiftMaster)
   , ((wmod,		    xK_v),	windows W.swapDown)
-  , ((wmod,		    xK_z),	windows $ W.shift iconWorkspace)
+  , ((wmod,		    xK_z),	windows $ W.shift $ show iconDesktop)
 
   , ((wmod,		    xK_space),	refresh)
   , ((wmod .|. controlMask, xK_space),	restart "xmonad" True)
@@ -119,13 +124,13 @@ bind =
   , ((mod5Mask,           xK_Up),	  mpc "-s +1")
   ]
   ++ zipWith (\i fk -> 
-    ((0, fk),		windows (W.view i))) desktopIds [xK_F1..]
+    ((0, fk),		windows $ W.view $ show i)) desktops [xK_F1..]
   ++ zipWith (\i fk -> 
-    ((shiftMask, fk),	windows (W.shift i))) desktopIds [xK_F1..]
+    ((shiftMask, fk),	windows $ W.shift $ show i)) desktops [xK_F1..]
   ++ zipWith (\i fk -> 
-    ((wmod, fk),	windows (W.view i))) desktopIds (xK_grave:[xK_1..])
+    ((wmod, fk),	windows $ W.view $ show i)) desktops (xK_grave:[xK_1..])
   ++ zipWith (\i fk -> 
-    ((wmod .|. shiftMask, fk),	windows (W.shift i))) desktopIds (xK_grave:[xK_1..])
+    ((wmod .|. shiftMask, fk),	windows $ W.shift $ show i)) desktops (xK_grave:[xK_1..])
   ++ if hostName == "pancake" then
   [ ((wmod .|. shiftMask,   xK_Prior),	spawnl ["/usr/sbin/setcx","C1"])
   , ((wmod .|. shiftMask,   xK_Next),	spawnl ["/usr/sbin/setcx","C3"])
@@ -144,7 +149,7 @@ mouse = --map (\(mb, rf, wf) -> (mb, \w -> isRoot w >>= \r -> if r then rf else 
 
 startup :: Bool -> X ()
 startup new = do
-  windows $ replaceWorkspaceLayout iconWorkspace iconLayout
+  windows $ replaceDesktopLayout iconDesktop iconLayout
   when new $ mapM_ (run . snd) startups
 
 main :: IO ()
@@ -160,7 +165,7 @@ main = do
     , layoutHook = layout
     , manageHook = manager
     , handleEventHook = \e -> io (readMVar sct) >>= \c -> serverEventHook c e
-    , X.workspaces = desktopIds ++ [iconWorkspace]
+    , X.workspaces = map show desktopsAll
     , modMask = wmod
     , keys = const $ Map.fromList bind
     , mouseBindings = const $ Map.fromList mouse
@@ -175,9 +180,7 @@ main = do
  -     paste to spellcheck
  -   menus
  -   main layouts
- -   investigate mapLayout for layout changes/perWorkspace
  -   floating/layering: in layout
- -   "icons"/hide: in layout? across desktops? separate desktop?
  -   better resize
  -   mpc/dzen status
  -   transparent/root dzen

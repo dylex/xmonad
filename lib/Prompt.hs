@@ -1,4 +1,4 @@
-{-# OPTIONS -Wall #-}
+{-# OPTIONS -Wall -fno-warn-orphans #-}
 {-# LANGUAGE PatternGuards, MultiParamTypeClasses, TypeSynonymInstances, FlexibleInstances, FlexibleContexts, ScopedTypeVariables, ExistentialQuantification, StandaloneDeriving #-}
 module Prompt
   ( promptRun
@@ -141,7 +141,7 @@ promptLogin = do
 instance Output Desktop
 
 desktop :: Completer Desktop
-desktop = oneOf desktops
+desktop = oneOf desktopsAll
 
 instance Output NamedWindow where
   output w = show w ++ '#' : show (unName w)
@@ -195,7 +195,7 @@ ops defw = do
     ,ow "unmanage"	unmanage
     ,ow "kill"		killWindow
     ,ow "hide"		hide
-    ,ow "icon"		$ windows . W.shiftWin iconWorkspace
+    ,ow "icon"		$ windows . W.shiftWin (show iconDesktop)
     ,ow "reveal"	reveal
     ,ow "focus"		$ windows . W.focusWindow
     ,ow "xfocus"	setFocusX

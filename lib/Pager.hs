@@ -70,7 +70,7 @@ deskInfo set d = wins >=. \(wm:wl) -> (line True wm, map (line False) wl) where
     (cmd, arg) = if not top || master && cur then (ServerCommandFocus, ii w) else (ServerCommandView, i) 
   wins ws@(W.Workspace{ W.stack = Just stack }) =
     mapM (getWinInfo set ws) (W.integrate stack)
-  wins _ = return [WinInfo undefined tag False False False]
+  wins _ = asks theRoot >.= \r -> [WinInfo r tag False False False]
   cur = tag == W.currentTag set
   tag = show d
   i = fromEnum d
@@ -89,8 +89,8 @@ pagerLog h = do
   s <- gets windowset
   let ws = W.workspaces s
       fd i = fromJust $ find ((i ==) . W.tag) ws
-  (tl,bll) <- mapAndUnzipM (\i -> deskInfo s i $ fd (show i)) desktops
-  il <- iconInfo s (fd iconWorkspace)
+  (tl,bll) <- mapAndUnzipM (\i -> deskInfo s i $ fd $ show i) desktops
+  il <- iconInfo s (fd $ show iconDesktop)
   io $ hPutStrLn h $ "^cs()\n^tw()^ib(1)" 
     ++ concat tl
     ++ "\n^ib(1)" ++ unlines (map concat (transpose bll))

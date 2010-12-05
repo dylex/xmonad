@@ -4,8 +4,8 @@ module Param
   ( osName
   , hostName, hostHome
   , home
-  , Desktop, desktops, desktopIds
-  , iconWorkspace
+  , Desktop, desktops
+  , iconDesktop, desktopsAll
   , topHeight
   , wmod
   , COLOR
@@ -40,21 +40,26 @@ hostHome = hostName == "datura"
 home :: String
 home = unsafePerformIO $ getEnv "HOME"
 
-newtype Desktop = Desktop { unDesktop :: Int } deriving (Eq, Ord, Enum, Ix)
-instance Show Desktop where showsPrec n = showsPrec n . unDesktop
-instance Read Desktop where readsPrec n = map (first Desktop) . readsPrec n
+newtype Desktop = Desktop { _unDesktop :: Int } deriving (Eq, Ord, Enum, Ix)
+
 instance Bounded Desktop where
   minBound = Desktop 0
   maxBound = Desktop 7
 
-desktops :: [Desktop]
+iconDesktop :: Desktop
+iconDesktop = Desktop (-1)
+
+desktops, desktopsAll :: [Desktop]
 desktops = allOf
+desktopsAll = allOf ++ [iconDesktop]
 
-desktopIds :: [WorkspaceId]
-desktopIds = map show desktops -- assumed to be sorted
+instance Show Desktop where 
+  show (Desktop (-1)) = "icon"
+  show (Desktop n) = show n
 
-iconWorkspace :: WorkspaceId  -- TODO: incorporate above?
-iconWorkspace = "icon"
+instance Read Desktop where 
+  readsPrec n s = [(iconDesktop, r) | ("icon", r) <- lex s] 
+    ++ map (first Desktop) (readsPrec n s)
 
 topHeight :: Int
 topHeight = 50

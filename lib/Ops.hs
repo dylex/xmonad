@@ -11,7 +11,7 @@ module Ops
   , switchWindow
   , viewDesk, shiftDesk
   , succWrap, predWrap
-  , replaceWorkspaceLayout
+  , replaceDesktopLayout
   ) where
 
 import Control.Monad.Trans
@@ -61,7 +61,7 @@ warpFocus :: X ()
 warpFocus = XWarp.warpToWindow 0.5 0.5
 
 stickWindow :: Window -> WindowSet -> WindowSet
-stickWindow w s = foldr (XCW.copyWindow w) s desktopIds
+stickWindow w s = foldr (XCW.copyWindow w) s $ map show desktops
 
 switchWindow :: Window -> X ()
 switchWindow = sendMessage . SwitchWindow
@@ -83,9 +83,9 @@ predWrap x
   | x == minBound = maxBound
   | otherwise = pred x
 
-replaceWorkspaceLayout :: (LayoutClass l Window, Read (l Window)) => WorkspaceId -> l Window -> WindowSet -> WindowSet
-replaceWorkspaceLayout w l = W.mapWorkspace m where
+replaceDesktopLayout :: (LayoutClass l Window, Read (l Window)) => Desktop -> l Window -> WindowSet -> WindowSet
+replaceDesktopLayout w l = W.mapWorkspace m where
   m ws 
-    | W.tag ws == w = ws{ W.layout = Layout l }
+    | W.tag ws == show w = ws{ W.layout = Layout l }
     | otherwise = ws
 
