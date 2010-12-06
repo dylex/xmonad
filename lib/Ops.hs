@@ -83,10 +83,10 @@ predWrap x
   | otherwise = pred x
 
 rotDown', rotUp' :: W.Stack a -> W.Stack a
-rotDown' s@(W.Stack f [] []) = s
+rotDown' s@(W.Stack _ [] []) = s
 rotDown' (W.Stack f (t:u) d) = W.Stack t u  (f:d) -- focusUp'
 rotDown' (W.Stack f [] d)    = W.Stack t [] (f:d') where (d',t) = initLast d
-rotUp' s@(W.Stack f [] [])  = s
+rotUp' s@(W.Stack _ [] [])  = s
 rotUp' (W.Stack f [] (t:d)) = W.Stack t []    (d++:f)
 rotUp' (W.Stack f u [])    = W.Stack m (f:u') [] where (u',m) = initLast u
 rotUp' (W.Stack f u (t:d)) = W.Stack t (f:u') (d++:m) where (u',m) = initLast u
