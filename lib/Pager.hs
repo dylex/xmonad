@@ -30,54 +30,58 @@ dzenArgs = dzenDefaultArgs ++
   ,"-e","entertitle=uncollapse;leaveslave=collapse;button2=togglestick;button4=scrollup;button5=scrolldown"
   ]
 
+data StackPos = Up | Focus | Down deriving (Eq, Ord)
+
 data WinInfo = WinInfo
   { win :: Window
   , winName :: String
-  , winMaster :: !Bool
-  , winFocus :: !Bool
-  , winFloating :: !Bool
+  , winPos :: !StackPos
+  , winFloat :: !Bool
   }
 
-getWinInfo :: WindowSet -> WindowSpace -> Window -> X WinInfo
-getWinInfo set ws w = do
+getWinInfo :: WindowSet -> WindowSpace -> StackPos -> Window -> X WinInfo
+getWinInfo set _ws p w = do
   n <- show =.< getName w
   return $ WinInfo
     { win = w
     , winName = n
-    , winMaster = iss (head . W.integrate)
-    , winFocus = iss W.focus
-    , winFloating = w `Map.member` W.floating set
+    , winPos = p
+    , winFloat = w `Map.member` W.floating set
     }
-  where
-    iss f = maybe False ((w ==) . f) $ W.stack ws
+
+getWinList :: WindowSet -> WindowSpace -> X [WinInfo]
+getWinList _ (W.Workspace{ W.stack = Nothing }) = return []
+getWinList set ws@(W.Workspace{ W.stack = Just (W.Stack f u d) }) = mapM (uncurry $ getWinInfo set ws) $ (Focus,f) : map ((,) Up) u ++ map ((,) Down) d
 
 winInfo :: WinInfo -> Int -> String
 winInfo w l = dzenClickArea 3 ServerCommandWindowMenu [ii $ win w] $ take l $ winName w
 
 deskInfo :: WindowSet -> Desktop -> WindowSpace -> X (String, [String])
 deskInfo set d = wins >=. \(wm:wl) -> (line True wm, map (line False) wl) where
-  line top wi@(WinInfo w _ master fcs flt) =
+  line top w =
     (if cur then "pa"^/show (i*pagerDeskWidth) ++ "fg"^/"#404080" ++ "r"^/(show pagerDeskWidth ++ "x" ++ show fontSize) else "")
     ++ "pa"^/show (i*pagerDeskWidth)
-    ++ (if flt then "bg"^/"#408040" ++ "ib"^/"0" else "")
-    ++ "fg"^/(if cur then if fcs then "#FFFFBB" else colorFG 
-		     else if fcs then "#BBBBFF" else colorBG)
+    ++ (if winFloat w then "bg"^/fcol else "ib"^/"1")
+    ++ "fg"^/(if cur then if winPos w == Down then "#C0C080" else "#FFFFC0"
+		     else if winPos w == Down then "#8080C0" else "#C0C0FF")
     ++ dzenClickArea 1 cmd [arg]
-      (winInfo wi deskChars)
-    ++ (if flt then "bg"^/"" ++ "ib"^/"1" else "")
+      (winInfo w deskChars)
+    ++ (if winFloat w then "bg"^/"" else "ib"^/"0")
     where
-    (cmd, arg) = if not top || master && cur then (ServerCommandFocus, ii w) else (ServerCommandView, i) 
-  wins ws@(W.Workspace{ W.stack = Just stack }) =
-    mapM (getWinInfo set ws) (W.integrate stack)
-  wins _ = asks theRoot >.= \r -> [WinInfo r tag False False False]
+    (cmd, arg) = if not top || winPos w == Focus && cur then (ServerCommandFocus, ii $ win w) else (ServerCommandView, i) 
+  fcol 
+    | cur = "#408040"
+    | otherwise = "#004000"
+  wins ws@(W.Workspace{ W.stack = Just _ }) = getWinList set ws
+  wins _ = asks theRoot >.= \r -> [WinInfo r tag Down False]
   cur = tag == W.currentTag set
   tag = show d
   i = fromEnum d
 
 iconInfo :: WindowSet -> WindowSpace -> X String
-iconInfo set ws = unwords . map icon =.< mapM (getWinInfo set ws) (W.integrate' (W.stack ws)) where
+iconInfo set ws = unwords . map icon =.< getWinList set ws where
   icon w =
-    "fg"^/(if winFocus w then colorFG else colorBG)
+    "fg"^/(if winPos w == Focus then colorFG else colorBG)
     ++ "ib"^/"0"
     ++ dzenClickArea 1 ServerCommandShift [ii $ win w, -1]
       (winInfo w 60)
@@ -90,9 +94,9 @@ pagerLog h = do
       fd i = fromJust $ find ((i ==) . W.tag) ws
   (tl,bll) <- mapAndUnzipM (\i -> deskInfo s i $ fd $ show i) desktops
   il <- iconInfo s (fd $ show iconDesktop)
-  io $ hPutStrLn h $ "^cs()\n^tw()^ib(1)" 
+  io $ hPutStrLn h $ "^cs()\n^tw()" 
     ++ concat tl
-    ++ "\n^ib(1)" ++ unlines (map concat (transpose bll))
+    ++ '\n' : unlines (map concat (transpose bll))
     ++ "bg"^/"#400000" ++ il
 
 pagerStart :: IO (X ())

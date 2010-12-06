@@ -29,7 +29,7 @@ import Prompt
 isStuck :: Property
 isStuck = Title "stuck term"
 
-layout = smartBorders $ splitLayout (R, 8+80*6) isStuck lmain lstuck
+layout = lessBorders OnlyFloat $ splitLayout (R, 8+80*6) isStuck lmain lstuck
   where
   lmain = Full
   lstuck = Column 1
@@ -77,10 +77,10 @@ bind =
   , ((wmod .|. shiftMask,   xK_d),	runLogin "dylex")
   , ((wmod,		    xK_h),	windows $ viewDesk predWrap)
   , ((wmod .|. shiftMask,   xK_h),	windows $ shiftDesk predWrap)
-  , ((wmod,		    xK_t),	windows W.focusUp)
-  , ((wmod,		    xK_n),	windows W.focusDown)
+  , ((wmod,		    xK_t),	windows $ W.focusDown)
+  , ((wmod,		    xK_n),	windows $ W.focusUp)
   , ((wmod,		    xK_s),	windows $ viewDesk succWrap)
-  , ((wmod .|. shiftMask,   xK_s),	windows $ shiftDesk predWrap)
+  , ((wmod .|. shiftMask,   xK_s),	windows $ shiftDesk succWrap)
   , ((wmod,		    xK_minus),	toggleWS)
   , ((wmod .|. shiftMask,   xK_minus),	withFocused (sendMessage . SwitchWindow))
   , ((wmod,		    xK_Return),	windows $ W.view $ show $ head desktops)
@@ -182,6 +182,7 @@ main = do
  -   menus
  -   main layouts
  -   floating/layering: in layout
+ -     maybe layer st focus == master?
  -   better resize/move: display size
  -   resize issues: mrxvt/firefox start wrong size
  -   mrxvt refresh

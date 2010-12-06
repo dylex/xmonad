@@ -31,9 +31,6 @@ import Util
 with :: b -> a -> (a, b)
 with = flip (,)
 
-(++:) :: [a] -> a -> [a]
-l ++: x = l ++ [x]
-
 listToMaybe' :: [x] -> Maybe x
 listToMaybe' [x] = Just x
 listToMaybe' _ = Nothing
@@ -188,14 +185,14 @@ _stringify :: Output a => Completer a -> CS
 _stringify = fmap output
 
 data Word a 
-  = Frag { unWord :: a }
-  | Word { unWord :: a } 
+  = Frag { unWord :: !a }
+  | Word { unWord :: !a } 
   deriving (Show)
 instance Output a => Output (Word a) where 
   output (Frag a) = output a
   output (Word a) = output a ++: ' '
 
-data Words a b = Words { headWord :: a, tailWords :: Maybe b } deriving (Show)
+data Words a b = Words { headWord :: !a, tailWords :: Maybe b } deriving (Show)
 instance (Output a, Output b) => Output (Words a b) where
   output (Words a Nothing) = output a
   output (Words a (Just b)) = output a ++ ' ' : output b

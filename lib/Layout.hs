@@ -6,7 +6,7 @@ module Layout
   ) where
 
 import XMonad as X
-import XMonad.StackSet
+import XMonad.StackSet as W
 import XMonad.Util.Types
 import XMonad.Util.WindowProperties
 import Data.Maybe
@@ -21,13 +21,14 @@ data SplitLayout lm ls a = SplitLayout
   , splitMain :: !(lm a)
   , splitSub :: !(ls a)
   , splitMains, splitSubs :: ![a]
+  , splitMainFocus, splitSubFocus :: !(Maybe a)
   } deriving (Show, Read)
 
 data SwitchWindow = SwitchWindow Window deriving (Show, Read, Typeable)
 instance Message SwitchWindow
 
 splitLayout :: (LayoutClass lm Window, LayoutClass ls Window) => (Direction2D, Dimension) -> Property -> lm Window -> ls Window -> SplitLayout lm ls Window
-splitLayout (d, z) p lm ls = SplitLayout d z p lm ls [] []
+splitLayout (d, z) p lm ls = SplitLayout d z p lm ls [] [] Nothing Nothing
 
 half :: Rational
 half = 0.5
@@ -48,19 +49,27 @@ splitRect (L, _) r = swap $ splitVerticallyBy half r
 splitRect (D, _) r = splitHorizontallyBy half r
 splitRect (U, _) r = swap $ splitHorizontallyBy half r
 
-partitionStackM :: Monad m => (a -> m Bool) -> Maybe (Stack a) -> m (Maybe (Stack a), Maybe (Stack a))
-partitionStackM _ Nothing = return (Nothing, Nothing)
-partitionStackM p (Just (Stack f u d)) = do
+partitionStackM :: (Monad m, Eq a) => (a -> m Bool) -> Maybe a -> Maybe a -> Maybe (Stack a) -> m (Maybe (Stack a), Maybe (Stack a))
+partitionStackM _ _ _ Nothing = return (Nothing, Nothing)
+partitionStackM p f1 f2 (Just (Stack f u d)) = do
   af <- p f
   (u1,u2) <- partitionM p u
   (d1,d2) <- partitionM p d
   return $ if af
-    then (Just (Stack f u1 d1), refocus u2 d2)
-    else (refocus u1 d1, Just (Stack f u2 d2))
+    then (Just (Stack f u1 d1), refocus u2 d2 f2)
+    else (refocus u1 d1 f1, Just (Stack f u2 d2))
   where
-    refocus u (f:d) = Just $ Stack f u d
-    refocus (f:u) d = Just $ Stack f u d
-    refocus [] [] = Nothing
+    refocus [] [] _ = Nothing
+    refocus u d (Just f)
+      | Just (d',u') <- foldAt f u = Just $ Stack f u' (d'++d)
+      | Just (u',d') <- foldAt f d = Just $ Stack f (u'++u) d'
+    refocus (f:u) d _ = Just $ Stack f u d
+    refocus u (f:d) _ = Just $ Stack f u d
+    foldAt x = fc [] where
+      fc _ [] = Nothing
+      fc a (y:b) 
+	| x == y = Just (a,b)
+	| otherwise = fc (y:a) b
 
 switchWindow :: SplitLayout lm ls Window -> Window -> Maybe (SplitLayout lm ls Window)
 switchWindow l@(SplitLayout{ splitMains = m, splitSubs = s }) w
@@ -72,7 +81,7 @@ instance (LayoutClass lm Window, LayoutClass ls Window) => LayoutClass (SplitLay
   description l = description (splitMain l) ++ " split " ++ show (splitSize l) ++ show (splitDirection l) ++ " " ++ description (splitSub l)
 
   runLayout (Workspace wid l s) r = do
-    (ss,sm) <- partitionStackM assignWindow s
+    (ss,sm) <- partitionStackM assignWindow (splitSubFocus l) (splitMainFocus l) s
     let
       (rm, rs) 
 	| isNothing ss = (r', r')
@@ -84,6 +93,8 @@ instance (LayoutClass lm Window, LayoutClass ls Window) => LayoutClass (SplitLay
       , splitSub  = fromMaybe (splitSub  l) ls
       , splitMains = maybe [] integrate sm
       , splitSubs  = maybe [] integrate ss
+      , splitMainFocus = fmap W.focus sm
+      , splitSubFocus = fmap W.focus ss
       })
     where
     r' = gaps r

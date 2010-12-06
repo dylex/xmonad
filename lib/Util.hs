@@ -8,6 +8,7 @@ module Util
   , guard1
   , swap
   , rangeOf, allOf
+  , (++:), initLast
   , deleteOne
   , partitionElems, partitionM
   , concatMapM
@@ -19,6 +20,7 @@ module Util
 import Control.Arrow
 import Control.Monad
 import Data.Maybe
+import GHC.List (errorEmptyList)
 
 ii :: (Integral a, Integral b) => a -> b
 ii = fromIntegral
@@ -52,6 +54,15 @@ rangeOf = (minBound, maxBound)
 
 allOf :: (Enum a, Bounded a) => [a]
 allOf = enumFromTo minBound maxBound
+
+infixl 4 ++:
+(++:) :: [a] -> a -> [a]
+l ++: x = l ++ [x]
+
+initLast :: [a] -> ([a], a)
+initLast [x] = ([], x)
+initLast (x:l) = first (x:) $ initLast l
+initLast [] = errorEmptyList "initLast"
 
 deleteOne :: Eq a => a -> [a] -> Maybe [a]
 deleteOne _ [] = Nothing
