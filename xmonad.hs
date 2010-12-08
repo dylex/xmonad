@@ -57,11 +57,11 @@ bind =
   , ((wmod,		    xK_f),	runBrowser Nothing)
   --, ((wmod,		    xK_g),	runTerm term{ termRun = Just (Run "elinks") })
   , ((wmod,		    xK_c),	windows (W.swapUp . W.focusDown))
-  , ((wmod .|. shiftMask,   xK_c),	promptRun True)
+  , ((wmod .|. shiftMask,   xK_c),	promptRun False)
   , ((wmod,		    xK_r),	windows (W.shiftMaster . W.focusUp))
-  , ((wmod .|. shiftMask,   xK_r),	promptRun False)
+  , ((wmod .|. shiftMask,   xK_r),	promptLogin)
   , ((wmod,		    xK_l),	runTerm term)
-  , ((wmod .|. shiftMask,   xK_l),	promptLogin)
+  , ((wmod .|. shiftMask,   xK_l),	promptRun True)
   , ((wmod .|. controlMask, xK_l),	setLayout (Layout layout) >> refresh)
   -- xK_slash
   -- xK_equal
@@ -76,11 +76,11 @@ bind =
   , ((wmod,		    xK_d),	nextScreen)
   , ((wmod .|. shiftMask,   xK_d),	runLogin "dylex")
   , ((wmod,		    xK_h),	windows $ viewDesk predWrap)
-  , ((wmod .|. shiftMask,   xK_h),	windows $ shiftDesk predWrap)
+  , ((wmod .|. shiftMask,   xK_h),	windows $ viewDesk predWrap . shiftDesk predWrap)
   , ((wmod,		    xK_t),	windows $ W.focusDown)
   , ((wmod,		    xK_n),	windows $ W.focusUp)
   , ((wmod,		    xK_s),	windows $ viewDesk succWrap)
-  , ((wmod .|. shiftMask,   xK_s),	windows $ shiftDesk succWrap)
+  , ((wmod .|. shiftMask,   xK_s),	windows $ viewDesk succWrap . shiftDesk succWrap)
   , ((wmod,		    xK_minus),	toggleWS)
   , ((wmod .|. shiftMask,   xK_minus),	withFocused (sendMessage . SwitchWindow))
   , ((wmod,		    xK_Return),	windows $ W.view $ show $ head desktops)
@@ -92,7 +92,7 @@ bind =
   -- k
   , ((wmod,		    xK_x),	kill)
   , ((wmod,		    xK_b),	spawn "xbg && [ -p HOME/.xtail ] && touch HOME/.xtail")
-  , ((wmod,		    xK_m),	withFocused float)
+  , ((wmod,		    xK_m),	withFocused floatAdjust)
   , ((wmod .|. shiftMask,   xK_m),	withFocused (windows . W.sink))
   , ((wmod,		    xK_w),	windows W.shiftMaster)
   , ((wmod,		    xK_v),	windows W.swapDown)
@@ -158,8 +158,8 @@ main = do
   pagerLog <- pagerStart
   sct <- newEmptyMVar
   xmonad $ XConfig
-    { normalBorderColor = colorBG
-    , focusedBorderColor = colorFG
+    { normalBorderColor = "#6060A0"
+    , focusedBorderColor = "#E0E0A0"
     , X.terminal = Program.terminal term
     , layoutHook = layout
     , manageHook = manager
@@ -179,14 +179,14 @@ main = do
  -   bindings
  -     paste to browser
  -     paste to spellcheck
- -   menus
  -   main layouts
  -   floating/layering: in layout
  -     maybe layer st focus == master?
+ -   applySizeHints when float? might need to add w/h to X11 but are obsolete
  -   better resize/move: display size
  -   resize issues: mrxvt/firefox start wrong size
  -   mrxvt refresh
- -   mrxvt setting ICON_NAME not NAME?
+ -   menus
  -   mpc/dzen status
  -   exec dzen
  -   transparent/root dzen

@@ -11,6 +11,7 @@ module Ops
   , viewDesk, shiftDesk
   , succWrap, predWrap
   , rotUp', rotDown'
+  , floatAdjust
   ) where
 
 import Control.Monad.Trans
@@ -90,3 +91,14 @@ rotUp' s@(W.Stack _ [] [])  = s
 rotUp' (W.Stack f [] (t:d)) = W.Stack t []    (d++:f)
 rotUp' (W.Stack f u [])    = W.Stack m (f:u') [] where (u',m) = initLast u
 rotUp' (W.Stack f u (t:d)) = W.Stack t (f:u') (d++:m) where (u',m) = initLast u
+
+windowHintAdjust :: Window -> X ()
+windowHintAdjust w = withDisplay $ \dpy -> io $ do
+  wa <- getWindowAttributes dpy w
+  sh <- getWMNormalHints dpy w
+  -- ideally would like width and height hints, but not included in SizeHints...
+  resizeWindow dpy w `uncurry` 
+    applySizeHints (ii $ wa_border_width wa) sh (wa_width wa, wa_height wa)
+
+floatAdjust :: Window -> X ()
+floatAdjust w = windowHintAdjust w >> float w

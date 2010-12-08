@@ -81,7 +81,7 @@ deskInfo set d = wins >=. \(wm:wl) -> (line True wm, map (line False) wl) where
 iconInfo :: WindowSet -> WindowSpace -> X String
 iconInfo set ws = unwords . map icon =.< getWinList set ws where
   icon w =
-    "fg"^/(if winPos w == Focus then colorFG else colorBG)
+    "fg"^/(if winPos w == Focus then "#FFFFC0" else "#C0C0F0")
     ++ "ib"^/"0"
     ++ dzenClickArea 1 ServerCommandShift [ii $ win w, -1]
       (winInfo w 60)

@@ -8,7 +8,6 @@ module Param
   , topHeight
   , wmod
   , COLOR
-  , colorFG, colorBG
   , colorRootFG
   , pagerWidth, pagerDeskWidth
   , isExec
@@ -67,12 +66,6 @@ wmod :: KeyMask
 wmod = mod4Mask -- mod1Mask
 
 type COLOR = String
-
-colorFG :: COLOR
-colorFG = "#BBBBA4"
-
-colorBG :: COLOR
-colorBG = "#8080AA"
 
 colorRootFG :: COLOR
 colorRootFG = "#FFFFBB"
