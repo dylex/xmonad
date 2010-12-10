@@ -31,10 +31,10 @@ isStuck = Title "stuck term"
 
 layout = lessBorders OnlyFloat $ splitLayout (R, 8+80*6) isStuck lmain lstuck
   where
-  lmain = Full ||| Tall 1 (1%32) (1%2)
+  lmain = Full ||| Tall 1 (1%32) (1%2) ||| Column 1
   lstuck = Column 1
 
-iconLayout = Tall 1 (1%32) (1%2)
+iconLayout = Tall 1 (1%32) (1%2) -- FIXME
 
 manager :: ManageHook
 manager = composeAll
