@@ -31,10 +31,10 @@ isStuck = Title "stuck term"
 
 layout = lessBorders OnlyFloat $ splitLayout (R, 8+80*6) isStuck lmain lstuck
   where
-  lmain = Full
+  lmain = Full ||| Tall 1 (1%32) (1%2)
   lstuck = Column 1
 
-iconLayout = Tall 1 0 (1%2)
+iconLayout = Tall 1 (1%32) (1%2)
 
 manager :: ManageHook
 manager = composeAll
@@ -63,8 +63,9 @@ bind =
   , ((wmod,		    xK_l),	runTerm term)
   , ((wmod .|. shiftMask,   xK_l),	promptRun True)
   , ((wmod .|. controlMask, xK_l),	setLayout (Layout layout) >> refresh)
-  -- xK_slash
-  -- xK_equal
+  , ((wmod,		    xK_slash),	sendMessage NextLayout)
+  , ((wmod,		    xK_equal),	sendMessage Expand)
+  , ((wmod .|. shiftMask,   xK_equal),	sendMessage Shrink)
   -- xK_backslash
 
   -- xK_a
@@ -73,12 +74,12 @@ bind =
   -- xK_u
   , ((wmod,		    xK_i),	withFocused (\w -> io $ runProcessWithInput "xprop" ["-id",show w] "" >>= notify))
   --, ((wmod .|. shiftMask,   xK_i),	runLogin "icicle")
-  , ((wmod,		    xK_d),	nextScreen)
+  , ((wmod,		    xK_d),	sendMessage SwitchFocus) -- nextScreen
   , ((wmod .|. shiftMask,   xK_d),	runLogin "dylex")
   , ((wmod,		    xK_h),	windows $ viewDesk predWrap)
   , ((wmod .|. shiftMask,   xK_h),	windows $ viewDesk predWrap . shiftDesk predWrap)
-  , ((wmod,		    xK_t),	windows $ W.focusDown)
-  , ((wmod,		    xK_n),	windows $ W.focusUp)
+  , ((wmod,		    xK_t),	windows $ W.focusUp)
+  , ((wmod,		    xK_n),	windows $ W.focusDown)
   , ((wmod,		    xK_s),	windows $ viewDesk succWrap)
   , ((wmod .|. shiftMask,   xK_s),	windows $ viewDesk succWrap . shiftDesk succWrap)
   , ((wmod,		    xK_minus),	toggleWS)
