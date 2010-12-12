@@ -10,8 +10,7 @@ module Program
   ) where
 
 import XMonad as X hiding (terminal)
-import XMonad.Util.Run
-import System.IO
+import Data.Maybe
 import Util
 import Param
 import Ops
@@ -32,26 +31,22 @@ term = Term
   }
 
 runTerm :: MonadIO m => Term -> m ()
-runTerm t = spawnl $ terminal t 
-  : maybe [] (\n -> ["-title",n]) (termTitle t)
+runTerm t = run $ Run (terminal t) $
+  maybe [] (\n -> ["-title",n]) (termTitle t)
   ++ (if termHold t then ["-hold","1"] else [])
   ++ maybe [] (("-e":) . unRun) (termRun t)
 
 notify :: MonadIO m => String -> m ()
-notify s = io $ do
-  h <- spawnPipe "xmessage -file -"
-  hPutStr h s
-  hClose h
+notify = io . runInput (Run "xmessage" ["-file","-"])
 
 identWindow :: Window -> X ()
-identWindow w = io $ runProcessWithInput "xprop" ["-id",show w] "" >>= notify
+identWindow w = io $ runOutput (Run "xprop" ["-id",show w]) >>= notify
 
 browser :: String
 browser = "firefox"
 
 runBrowser :: Maybe String -> X ()
-runBrowser Nothing = spawnp browser
-runBrowser (Just url) = spawnl [browser,url]
+runBrowser = run . Run browser . maybeToList
 
 runLogin :: String -> X ()
 runLogin h = runTerm $ term{ termTitle = Just h, termRun = Just (RunShell ("ssh " ++ h)) }
@@ -102,8 +97,8 @@ programs = startups
 
 mixerSet :: MonadIO m => Ordering -> Int -> m ()
 mixerSet d n 
-  | osName == "Linux" = spawnl ["amixer","-q","-D","main","set","Master",show n ++ dirSign d]
-  | osName == "FreeBSD" = spawnl ["/usr/sbin/mixer",if hostName == "druid" then "ogain" else "vol",dirSign d ++ show n]
+  | osName == "Linux" = run $ Run "amixer" ["-q","-D","main","set","Master",show n ++ dirSign d]
+  | osName == "FreeBSD" = run $ Run "/usr/sbin/mixer" [if hostName == "druid" then "ogain" else "vol",dirSign d ++ show n]
   | otherwise = nop
   where
   dirSign LT = "-"

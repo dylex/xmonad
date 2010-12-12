@@ -6,7 +6,6 @@ module Dzen
   ) where
 
 import System.IO
-import XMonad.Util.Run
 import Param
 import Ops
 import Server
@@ -29,4 +28,4 @@ dzenClickArea :: Int -> ServerCommand -> [Int] -> String -> String
 dzenClickArea b c a s = "ca" ^/ (show b ++ ',' : dzenServerCommand c a) ++ s ++ "^ca()"
 
 runDzen :: [String] -> IO Handle
-runDzen = spawnPipe . unwords . ("dzen2":) . map shellEscape
+runDzen = runPipe . Run "dzen2"

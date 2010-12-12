@@ -3,8 +3,9 @@ module Ops
   ( debug
   , isElem
   , shellEscape
-  , Run(..), unRun, run
-  , spawnp, spawnl
+  , Run(..), unRun
+  , run, runPipe
+  , runInput, runOutput, runIO
   , warpFocus
   , stickWindow
   , switchWindow
@@ -16,12 +17,13 @@ module Ops
 
 import Control.Monad.Trans
 import Data.Maybe
+import System.IO
 import System.IO.Unsafe
+import System.Process
 import XMonad as X
 import qualified XMonad.StackSet as W
 import qualified XMonad.Actions.CopyWindow as XCW
 import qualified XMonad.Actions.Warp as XWarp
-import qualified XMonad.Util.Run as XRun
 import Util
 import Param
 import Layout
@@ -38,7 +40,7 @@ shellEscape (c:s)
   | c `elem` " !\"#$&'()*;<>?@[\\]`{|}" = '\\':c:shellEscape s
   | otherwise = c:shellEscape s
 
-data Run 
+data Run
   = Run String [String]
   | RunShell String
 
@@ -46,16 +48,43 @@ unRun :: Run -> [String]
 unRun (Run p a) = p:a
 unRun (RunShell c) = ["sh","-c",c]
 
+_runCmdSpec :: Run -> CmdSpec
+_runCmdSpec (Run p a) = RawCommand p a
+_runCmdSpec (RunShell s) = ShellCommand s
+
+runCreateProcess :: Run -> CreateProcess
+runCreateProcess (Run p a) = proc p a
+runCreateProcess (RunShell s) = shell s
+
 run :: MonadIO m => Run -> m ()
-run (Run p a) = XRun.safeSpawn p a
-run (RunShell c) = XRun.unsafeSpawn c
+run r = io $ void $ createProcess $ runCreateProcess r -- throws?
 
-spawnp :: MonadIO m => String -> m ()
-spawnp p = run $ Run p []
+runPipe :: Run -> IO Handle
+runPipe r = do
+  (Just h, Nothing, Nothing, _) <- createProcess (runCreateProcess r){ std_in = CreatePipe }
+  return h
 
-spawnl :: MonadIO m => [String] -> m ()
-spawnl [] = nop
-spawnl (p:a) = run $ Run p a
+runInput :: Run -> String -> IO ()
+runInput r i = do
+  hi <- runPipe r
+  hPutStr hi i
+  hClose hi
+
+runOutput :: Run -> IO String
+runOutput r = do
+  (Nothing, Just ho, Nothing, _) <- createProcess (runCreateProcess r){ std_out = CreatePipe }
+  o <- hGetContents ho
+  o `seq` hClose ho
+  return o
+
+runIO :: Run -> String -> IO String
+runIO r i = do
+  (Just hi, Just ho, Nothing, _) <- createProcess (runCreateProcess r){ std_in = CreatePipe, std_out = CreatePipe }
+  hPutStr hi i
+  hClose hi
+  o <- hGetContents ho
+  o `seq` hClose ho
+  return o
 
 warpFocus :: X ()
 warpFocus = XWarp.warpToWindow 0.5 0.5

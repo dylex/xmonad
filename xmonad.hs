@@ -39,7 +39,7 @@ iconLayout = Tall 1 (1%32) (1%2) -- FIXME
 manager :: ManageHook
 manager = composeAll
   [ isElem title ["Stripchart","xeyes","xload","xdaliclock","Dali Clock","xrtail"] --> doIgnore
-  , isElem className ["feh"] <||> isElem title ["Event Tester","MPlayer"] --> doFloat
+  , isElem className ["feh","Gimp"] <||> isElem title ["Event Tester","MPlayer"] --> doFloat
   , propertyToQuery isStuck --> ask >>= doF . stickWindow
   ]
 
@@ -86,13 +86,13 @@ bind =
   , ((wmod .|. shiftMask,   xK_minus),	withFocused (sendMessage . SwitchWindow))
   , ((wmod,		    xK_Return),	windows $ W.view $ show $ head desktops)
 
-  , ((wmod,		    xK_semicolon), spawn ((if hostHome then "" else "xlock && ") ++ "sleep 2 && xset dpms force off"))
+  , ((wmod,		    xK_semicolon), run $ RunShell $ (if hostHome then "" else "xlock && ") ++ "sleep 2 && xset dpms force off")
   , ((wmod .|. shiftMask,   xK_semicolon), promptOp)
-  , ((wmod,		    xK_q),	spawnp "xlock")
+  , ((wmod,		    xK_q),	run (Run "xlock" []))
   -- j
   -- k
   , ((wmod,		    xK_x),	kill)
-  , ((wmod,		    xK_b),	spawn "xbg && [ -p HOME/.xtail ] && touch HOME/.xtail")
+  , ((wmod,		    xK_b),	run $ RunShell $ "xbg && [ -p HOME/.xtail ] && touch HOME/.xtail")
   , ((wmod,		    xK_m),	withFocused floatAdjust)
   , ((wmod .|. shiftMask,   xK_m),	withFocused (windows . W.sink))
   , ((wmod,		    xK_w),	windows W.shiftMaster)
@@ -132,11 +132,11 @@ bind =
   ++ zipWith (\i fk -> 
     ((wmod .|. shiftMask, fk),	windows $ W.shift $ show i)) desktops (xK_grave:[xK_1..])
   ++ if hostName == "pancake" then
-  [ ((wmod .|. shiftMask,   xK_Prior),	spawnl ["/usr/sbin/setcx","C1"])
-  , ((wmod .|. shiftMask,   xK_Next),	spawnl ["/usr/sbin/setcx","C3"])
+  [ ((wmod .|. shiftMask,   xK_Prior),	run $ Run "/usr/sbin/setcx" ["C1"])
+  , ((wmod .|. shiftMask,   xK_Next),	run $ Run "/usr/sbin/setcx" ["C3"])
   ] else []
   where
-    mpc = spawnl . ("mpc":) . words
+    mpc = run . Run "mpc" . words
 
 mouse :: [((KeyMask, Button), Window -> X ())]
 mouse = --map (\(mb, rf, wf) -> (mb, \w -> isRoot w >>= \r -> if r then rf else wf w)) $
@@ -186,9 +186,8 @@ main = do
  -   applySizeHints when float? might need to add w/h to X11 but are obsolete
  -   better resize/move: display size
  -   resize issues: mrxvt/firefox start wrong size
- -   mrxvt refresh
- -   menus
+ -   mrxvt refresh: better
+ -   esc vs capslock bindings?
  -   mpc/dzen status
- -   exec dzen
  -   transparent/root dzen
  -}

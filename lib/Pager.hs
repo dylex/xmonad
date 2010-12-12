@@ -94,10 +94,12 @@ pagerLog h = do
       fd i = fromJust $ find ((i ==) . W.tag) ws
   (tl,bll) <- mapAndUnzipM (\i -> deskInfo s i $ fd $ show i) desktops
   il <- iconInfo s (fd $ show iconDesktop)
-  io $ hPutStrLn h $ "^cs()\n^tw()" 
+  io $ do
+  hPutStrLn h $ "^cs()\n^tw()" 
     ++ concat tl
     ++ '\n' : unlines (map concat (transpose bll))
     ++ "bg"^/"#400000" ++ il
+  hFlush h
 
 pagerStart :: IO (X ())
 pagerStart = pagerLog =.< runDzen dzenArgs

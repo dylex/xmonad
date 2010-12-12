@@ -2,7 +2,7 @@
 module Util 
   ( first, second
   , ii
-  , nop
+  , nop, void
   , (>.), (>.=), (>=.)
   , (=.<), (.=<)
   , guard1
@@ -27,6 +27,9 @@ ii = fromIntegral
 
 nop :: Monad m => m ()
 nop = return ()
+
+void :: Monad m => m a -> m ()
+void f = f >> nop
 
 infixl 1 >., >.=, >=.
 infixr 1 =.<, .=<
