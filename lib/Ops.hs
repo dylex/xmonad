@@ -6,6 +6,7 @@ module Ops
   , Run(..), unRun
   , run, runPipe
   , runInput, runOutput, runIO
+  , getCachedAtom
   , warpFocus
   , stickWindow
   , switchWindow
@@ -16,6 +17,7 @@ module Ops
   ) where
 
 import Control.Monad.Trans
+import Data.IORef
 import Data.Maybe
 import System.IO
 import System.IO.Unsafe
@@ -85,6 +87,17 @@ runIO r i = do
   o <- hGetContents ho
   o `seq` hClose ho
   return o
+
+getCachedAtom :: String -> IORef Atom -> X Atom
+getCachedAtom s r = do
+  a <- io $ readIORef r
+  if a == 0
+    then withDisplay $ \d -> io $ do
+      trace ("cacheAtom " ++ s)
+      a' <- internAtom d s False
+      writeIORef r a'
+      return a'
+    else return a
 
 warpFocus :: X ()
 warpFocus = XWarp.warpToWindow 0.5 0.5

@@ -9,14 +9,13 @@ import XMonad.Layout.NoBorders
 import XMonad.Util.Run
 import XMonad.Util.Types
 import XMonad.Util.WindowProperties
-import Control.Concurrent.MVar
 import Control.Monad
 import qualified Data.Map as Map
+import Data.Monoid
 import Data.Ratio ((%))
 import System.Environment
 import System.Exit
 import Graphics.X11.ExtraTypes.XF86
-import Util
 import Param
 import Ops
 import Layout
@@ -24,7 +23,7 @@ import Pager
 import Server
 import Program
 import Prompt
---import Selection
+import Selection
 
 isStuck :: Property
 isStuck = Title "stuck term"
@@ -55,7 +54,8 @@ bind =
   --, ((wmod,		    xK_p),	withSelection trace)
   -- xK_y
   , ((wmod,		    xK_f),	runBrowser Nothing)
-  --, ((wmod,		    xK_g),	runTerm term{ termRun = Just (Run "elinks") })
+  , ((wmod .|. shiftMask,   xK_f),	withSelection $ runBrowser . Just)
+  , ((wmod .|. shiftMask,   xK_g),	withSelection $ \u -> run $ Run "elinks" ["-remote",u])
   , ((wmod,		    xK_c),	windows (W.swapUp . W.focusDown))
   , ((wmod .|. shiftMask,   xK_c),	promptRun False)
   , ((wmod,		    xK_r),	windows (W.shiftMaster . W.focusUp))
@@ -64,6 +64,7 @@ bind =
   , ((wmod .|. shiftMask,   xK_l),	promptRun True)
   , ((wmod .|. controlMask, xK_l),	setLayout (Layout layout) >> refresh)
   , ((wmod,		    xK_slash),	sendMessage NextLayout)
+  , ((wmod .|. controlMask, xK_slash),	run $ RunShell "xclip -o | aspell -a | grep '^&' | xmessage -file -")
   , ((wmod,		    xK_equal),	sendMessage Expand)
   , ((wmod .|. shiftMask,   xK_equal),	sendMessage Shrink)
   -- xK_backslash
@@ -157,14 +158,13 @@ main = do
   args <- getArgs
   let new = "--resume" `notElem` args
   pagerLog <- pagerStart
-  sct <- newEmptyMVar
   xmonad $ XConfig
     { normalBorderColor = "#6060A0"
     , focusedBorderColor = "#E0E0A0"
     , X.terminal = Program.terminal term
     , layoutHook = layout
     , manageHook = manager
-    , handleEventHook = \e -> io (readMVar sct) >>= \c -> serverEventHook c e
+    , handleEventHook = serverEventHook `mappend` selectionEventHook
     , X.workspaces = map show desktopsAll
     , numlockMask = mod2Mask
     , modMask = wmod
@@ -172,14 +172,18 @@ main = do
     , mouseBindings = const $ Map.fromList mouse
     , borderWidth = 1
     , logHook = pagerLog
-    , startupHook = getServerCommandType >>= io . tryPutMVar sct >> startup new
+    , startupHook = do
+	dpy <- asks display
+	root <- asks theRoot
+	-- add propertyNotifyMask for rootw ... for selection
+	io $ selectInput dpy root $ substructureRedirectMask .|. substructureNotifyMask
+			        .|. enterWindowMask .|. leaveWindowMask .|. structureNotifyMask
+			        .|. buttonPressMask .|. propertyChangeMask
+	startup new
     , focusFollowsMouse = True
     }
 
 {- TODO:
- -   bindings
- -     paste to browser
- -     paste to spellcheck
  -   main layouts
  -   floating/layering: in layout
  -     maybe layer st focus == master?

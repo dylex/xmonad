@@ -15,12 +15,15 @@ module Util
   , Nullable(..)
   , readMaybe
   , toEnumMaybe
+  , globalIORef
   ) where
 
 import Control.Arrow
 import Control.Monad
+import Data.IORef
 import Data.Maybe
 import GHC.List (errorEmptyList)
+import System.IO.Unsafe
 
 ii :: (Integral a, Integral b) => a -> b
 ii = fromIntegral
@@ -116,3 +119,6 @@ toEnumMaybe :: forall a . (Enum a, Bounded a) => Int -> Maybe a
 toEnumMaybe x 
   | x >= fromEnum (minBound :: a) && x <= fromEnum (maxBound :: a) = Just (toEnum x)
   | otherwise = Nothing
+
+globalIORef :: a -> IORef a
+globalIORef = unsafePerformIO . newIORef

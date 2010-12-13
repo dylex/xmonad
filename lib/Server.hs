@@ -2,7 +2,6 @@ module Server
   ( ServerCommand(..)
   , serverEventHook
   , serverCommandType
-  , getServerCommandType
   ) where
 
 import XMonad
@@ -34,14 +33,15 @@ serverCommand c a = trace $ "Bad arguments to " ++ show c ++ ": " ++ show a
 serverCommandType :: String
 serverCommandType = "XMONAD_COMMAND"
 
-getServerCommandType :: X Atom
-getServerCommandType = do
-  d <- asks display
-  io $ internAtom d serverCommandType False
+getServerCommandAtom :: X Atom
+getServerCommandAtom = getCachedAtom serverCommandType (globalIORef 0)
 
-serverEventHook :: Atom -> Event -> X All
-serverEventHook ct (ClientMessageEvent{ ev_message_type = t, ev_data = cmd:args }) | t == ct = do
-  case toEnumMaybe (ii cmd) of
-    Just c -> serverCommand c (map ii args) >. All False
-    _ -> trace ("Unknown " ++ serverCommandType ++ ": " ++ show cmd) >. All True
-serverEventHook _ _ = return (All True)
+serverEventHook :: Event -> X All
+serverEventHook (ClientMessageEvent{ ev_message_type = t, ev_data = cmd:args }) = do
+  ct <- getServerCommandAtom
+  if t == ct
+    then case toEnumMaybe (ii cmd) of
+      Just c -> serverCommand c (map ii args) >. All False
+      _ -> trace ("Unknown " ++ serverCommandType ++ ": " ++ show cmd) >. All True
+    else return (All True)
+serverEventHook _ = return (All True)
