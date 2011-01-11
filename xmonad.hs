@@ -64,6 +64,7 @@ bind =
   , ((wmod .|. shiftMask,   xK_l),	promptRun True)
   , ((wmod .|. controlMask, xK_l),	setLayout (Layout layout) >> refresh)
   , ((wmod,		    xK_slash),	sendMessage NextLayout)
+  , ((wmod .|. shiftMask,   xK_slash),	sendMessage FirstLayout)
   , ((wmod .|. controlMask, xK_slash),	run $ RunShell "xclip -o | aspell -a | grep '^&' | xmessage -file -")
   , ((wmod,		    xK_equal),	sendMessage Expand)
   , ((wmod .|. shiftMask,   xK_equal),	sendMessage Shrink)
