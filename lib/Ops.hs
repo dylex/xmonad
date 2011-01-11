@@ -16,6 +16,7 @@ module Ops
   , floatAdjust
   ) where
 
+import Control.Monad
 import Control.Monad.Trans
 import Data.IORef
 import Data.Maybe
