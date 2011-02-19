@@ -4,6 +4,7 @@ import qualified XMonad.StackSet as W
 import qualified XMonad.Actions.CopyWindow as XCW
 import XMonad.Actions.CycleWS
 import XMonad.Actions.FlexibleResize
+import XMonad.Hooks.SetWMName (setWMName)
 import XMonad.Layout.Column
 import XMonad.Layout.NoBorders
 import XMonad.Util.Run
@@ -38,7 +39,7 @@ iconLayout = Tall 1 (1%32) (1%2) -- FIXME
 manager :: ManageHook
 manager = composeAll
   [ isElem title ["Stripchart","xeyes","xload","xdaliclock","Dali Clock","xrtail"] --> doIgnore
-  , isElem className ["feh","Gimp"] <||> isElem title ["Event Tester","MPlayer"] --> doFloat
+  , isElem className ["feh","Gimp"] <||> isElem title ["Event Tester","MPlayer","2by2"] --> doFloat
   , propertyToQuery isStuck --> ask >>= doF . stickWindow
   ]
 
@@ -180,6 +181,7 @@ main = do
 	io $ selectInput dpy root $ substructureRedirectMask .|. substructureNotifyMask
 			        .|. enterWindowMask .|. leaveWindowMask .|. structureNotifyMask
 			        .|. buttonPressMask .|. propertyChangeMask
+	setWMName "LG3D"
 	startup new
     , focusFollowsMouse = True
     }
