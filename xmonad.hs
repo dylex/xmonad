@@ -81,8 +81,8 @@ bind =
   , ((wmod .|. shiftMask,   xK_d),	runLogin "dylex")
   , ((wmod,		    xK_h),	windows $ viewDesk predWrap)
   , ((wmod .|. shiftMask,   xK_h),	windows $ viewDesk predWrap . shiftDesk predWrap)
-  , ((wmod,		    xK_t),	windows $ W.focusUp)
-  , ((wmod,		    xK_n),	windows $ W.focusDown)
+  , ((wmod,		    xK_t),	sendMessage $ SplitModifies W.focusUp')
+  , ((wmod,		    xK_n),	sendMessage $ SplitModifies W.focusDown')
   , ((wmod,		    xK_s),	windows $ viewDesk succWrap)
   , ((wmod .|. shiftMask,   xK_s),	windows $ viewDesk succWrap . shiftDesk succWrap)
   , ((wmod,		    xK_minus),	toggleWS)
@@ -191,6 +191,7 @@ main = do
  -   floating/layering: in layout
  -     maybe layer st focus == master?
  -   applySizeHints when float? might need to add w/h to X11 but are obsolete
+ -     partly working
  -   better resize/move: display size
  -   resize issues: mrxvt/firefox start wrong size
  -   mrxvt refresh: better

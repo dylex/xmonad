@@ -25,9 +25,11 @@ data SplitLayout lm ls a = SplitLayout
   } deriving (Show, Read)
 
 data SplitMessage 
-  = SwitchFocus 
-  | SwitchWindow Window 
-  deriving (Show, Read, Typeable)
+  = SwitchFocus -- switch focus to other side
+  | SwitchWindow Window -- move window to other side
+  | SplitModify (Stack Window -> Stack Window) -- apply a modification function to one side only
+  | SplitModifies (Stack Window -> Stack Window) -- apply a modification function, possibly multiple times until focus returns to the same side
+  deriving (Typeable)
 instance Message SplitMessage
 
 splitLayout :: (LayoutClass lm Window, LayoutClass ls Window) => (Direction2D, Dimension) -> Property -> lm Window -> ls Window -> SplitLayout lm ls Window
@@ -98,6 +100,23 @@ switchWindow l@(SplitLayout{ splitMains = m, splitSubs = s }) w
   | Just s' <- deleteOne w s = Just $ l{ splitMains = w:m, splitSubs = s' }
   | otherwise = Nothing
 
+splitModify :: Eq a => SplitLayout lm ls a -> (Stack a -> Stack a) -> (Stack a -> Stack a)
+splitModify l m (Stack f u d) = Stack f' (u2++u') (d'++d2) where
+  Stack f' u' d' = m $ Stack f u1 d1
+  (u1,u2) = partitionElems set u
+  (d1,d2) = partitionElems set d
+  set 
+    | f `elem` splitMains l = splitMains l
+    | f `elem` splitSubs l = splitSubs l
+    | otherwise = [f]
+
+splitModifies :: Eq a => SplitLayout lm ls a -> (Stack a -> Stack a) -> (Stack a -> Stack a)
+splitModifies l m s@(Stack f _ _) = until ((`elem` set) . W.focus) m (m s) where
+  set 
+    | f `elem` splitMains l = splitMains l
+    | f `elem` splitSubs l = splitSubs l
+    | otherwise = [f]
+
 instance (LayoutClass lm Window, LayoutClass ls Window) => LayoutClass (SplitLayout lm ls) Window where
   description l = description (splitMain l) ++ " split " ++ show (splitSize l) ++ show (splitDirection l) ++ " " ++ description (splitSub l)
 
@@ -127,4 +146,6 @@ instance (LayoutClass lm Window, LayoutClass ls Window) => LayoutClass (SplitLay
   handleMessage l m = case fromMessage m of
     Just SwitchFocus -> windows (modify' (switchFocus l)) >. Nothing
     Just (SwitchWindow w) -> return $ switchWindow l w
+    Just (SplitModify f) -> windows (modify' (splitModify l f)) >. Nothing
+    Just (SplitModifies f) -> windows (modify' (splitModifies l f)) >. Nothing
     Nothing -> fmap (\lm -> l{ splitMain = lm }) =.< handleMessage (splitMain l) m -- fallback to sub?
