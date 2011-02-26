@@ -2,6 +2,7 @@ module Server
   ( ServerCommand(..)
   , serverEventHook
   , serverCommandType
+  , serverInit
   ) where
 
 import XMonad
@@ -34,7 +35,7 @@ serverCommandType :: String
 serverCommandType = "XMONAD_COMMAND"
 
 getServerCommandAtom :: X Atom
-getServerCommandAtom = getCachedAtom serverCommandType (globalIORef 0)
+getServerCommandAtom = getAtomCached $ globalAtomCache serverCommandType
 
 serverEventHook :: Event -> X All
 serverEventHook (ClientMessageEvent{ ev_message_type = t, ev_data = cmd:args }) = do
@@ -45,3 +46,6 @@ serverEventHook (ClientMessageEvent{ ev_message_type = t, ev_data = cmd:args }) 
       _ -> trace ("Unknown " ++ serverCommandType ++ ": " ++ show cmd) >. All True
     else return (All True)
 serverEventHook _ = return (All True)
+
+serverInit :: X ()
+serverInit = void getServerCommandAtom

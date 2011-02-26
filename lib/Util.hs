@@ -2,7 +2,7 @@
 module Util 
   ( first, second
   , ii
-  , nop
+  , nop, void
   , (>.), (>.=), (>=.)
   , (=.<), (.=<)
   , guard1

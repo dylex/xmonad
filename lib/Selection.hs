@@ -15,7 +15,7 @@ import Ops
 -- based on 'XMonad.Util.XSelection.getSelection' and xclip
 
 getSelectionAtom :: X Atom
-getSelectionAtom = getCachedAtom "XMONAD_SELECTION" (globalIORef 0)
+getSelectionAtom = getAtomCached $ globalAtomCache "XMONAD_SELECTION"
 
 selectionAction :: IORef (Maybe (String -> X ()))
 selectionAction = globalIORef Nothing

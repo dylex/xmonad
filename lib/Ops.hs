@@ -6,7 +6,7 @@ module Ops
   , Run(..), unRun
   , run, runPipe
   , runInput, runOutput, runIO
-  , getCachedAtom
+  , AtomCache, globalAtomCache, getAtomCached
   , warpFocus
   , stickWindow
   , switchWindow
@@ -89,8 +89,13 @@ runIO r i = do
   o `seq` hClose ho
   return o
 
-getCachedAtom :: String -> IORef Atom -> X Atom
-getCachedAtom s r = do
+type AtomCache = (String, IORef Atom)
+
+globalAtomCache :: String -> AtomCache
+globalAtomCache s = (s, globalIORef 0)
+
+getAtomCached :: AtomCache -> X Atom
+getAtomCached (s,r) = do
   a <- io $ readIORef r
   if a == 0
     then withDisplay $ \d -> io $ do

@@ -182,6 +182,7 @@ main = do
 			        .|. enterWindowMask .|. leaveWindowMask .|. structureNotifyMask
 			        .|. buttonPressMask .|. propertyChangeMask
 	setWMName "LG3D"
+	serverInit
 	startup new
     , focusFollowsMouse = True
     }
