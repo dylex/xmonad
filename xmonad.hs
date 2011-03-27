@@ -125,6 +125,9 @@ bind =
   , ((mod5Mask,           xK_Right),	  mpc "-s +0:10")
   , ((mod5Mask,           xK_Down),	  mpc "-s -1")
   , ((mod5Mask,           xK_Up),	  mpc "-s +1")
+
+  , ((wmod .|. shiftMask, xK_Prior),	run $ if hostName == "pancake" then Run "/usr/sbin/setcx" ["C1"] else Run "eject" [])
+  , ((wmod .|. shiftMask, xK_Next),	run $ if hostName == "pancake" then Run "/usr/sbin/setcx" ["C3"] else Run "eject" ["-t"])
   ]
   ++ zipWith (\i fk -> 
     ((0, fk),		windows $ W.view $ show i)) desktops [xK_F1..]
@@ -134,10 +137,6 @@ bind =
     ((wmod, fk),	windows $ W.view $ show i)) desktops (xK_grave:[xK_1..])
   ++ zipWith (\i fk -> 
     ((wmod .|. shiftMask, fk),	windows $ W.shift $ show i)) desktops (xK_grave:[xK_1..])
-  ++ if hostName == "pancake" then
-  [ ((wmod .|. shiftMask,   xK_Prior),	run $ Run "/usr/sbin/setcx" ["C1"])
-  , ((wmod .|. shiftMask,   xK_Next),	run $ Run "/usr/sbin/setcx" ["C3"])
-  ] else []
   where
     mpc = run . Run "mpc" . words
 
