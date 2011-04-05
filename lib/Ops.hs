@@ -22,6 +22,7 @@ import Data.IORef
 import Data.Maybe
 import System.IO
 import System.IO.Unsafe
+import System.Posix.Process (executeFile, forkProcess, createSession)
 import System.Process
 import XMonad as X
 import qualified XMonad.StackSet as W
@@ -60,7 +61,12 @@ runCreateProcess (Run p a) = proc p a
 runCreateProcess (RunShell s) = shell s
 
 run :: MonadIO m => Run -> m ()
-run r = io $ void $ createProcess $ runCreateProcess r -- throws?
+-- run r = io $ void $ createProcess $ runCreateProcess r -- throws?
+run (RunShell c) = run $ Run "/bin/sh" ["-c", c]
+run (Run p a) = io $ void $ forkProcess $ do
+  uninstallSignalHandlers
+  _ <- createSession
+  executeFile p (head p /= '/') a Nothing
 
 runPipe :: Run -> IO Handle
 runPipe r = do
