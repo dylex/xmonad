@@ -90,8 +90,8 @@ partitionStackM p f1 f2 (Just (Stack f u d)) = do
 
 switchFocus :: Eq a => SplitLayout lm ls a -> Stack a -> Stack a
 switchFocus SplitLayout{ splitMainFocus = Just mf, splitSubFocus = Just sf} s@(Stack f _ _)
-  | mf == f = refocusStack sf s
   | sf == f = refocusStack mf s
+  | otherwise = refocusStack sf s
 switchFocus _ s = s
 
 switchWindow :: SplitLayout lm ls Window -> Window -> Maybe (SplitLayout lm ls Window)
@@ -103,19 +103,19 @@ switchWindow l@(SplitLayout{ splitMains = m, splitSubs = s }) w
 splitModify :: Eq a => SplitLayout lm ls a -> (Stack a -> Stack a) -> (Stack a -> Stack a)
 splitModify l m (Stack f u d) = Stack f' (u2++u') (d'++d2) where
   Stack f' u' d' = m $ Stack f u1 d1
-  (u1,u2) = partitionElems set u
-  (d1,d2) = partitionElems set d
-  set 
-    | f `elem` splitMains l = splitMains l
-    | f `elem` splitSubs l = splitSubs l
-    | otherwise = [f]
+  (u1,u2) = pf u
+  (d1,d2) = pf d
+  pf
+    | f `elem` splitMains l = partitionElems (splitMains l)
+    | f `elem` splitSubs l = partitionElems (splitSubs l)
+    | otherwise = swap . partitionElems (splitMains l ++ splitSubs l)
 
 splitModifies :: Eq a => SplitLayout lm ls a -> (Stack a -> Stack a) -> (Stack a -> Stack a)
-splitModifies l m s@(Stack f _ _) = until ((`elem` set) . W.focus) m (m s) where
-  set 
-    | f `elem` splitMains l = splitMains l
-    | f `elem` splitSubs l = splitSubs l
-    | otherwise = [f]
+splitModifies l m s@(Stack f _ _) = until (tf . W.focus) m (m s) where
+  tf
+    | f `elem` splitMains l = (`elem` splitMains l)
+    | f `elem` splitSubs l = (`elem` splitSubs l)
+    | otherwise = (`notElem` splitMains l ++ splitSubs l)
 
 instance (LayoutClass lm Window, LayoutClass ls Window) => LayoutClass (SplitLayout lm ls) Window where
   description l = description (splitMain l) ++ " split " ++ show (splitSize l) ++ show (splitDirection l) ++ " " ++ description (splitSub l)
