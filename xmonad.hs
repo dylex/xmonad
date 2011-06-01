@@ -99,6 +99,7 @@ bind =
   , ((wmod,		    xK_m),	withFocused floatAdjust)
   , ((wmod .|. shiftMask,   xK_m),	withFocused (windows . W.sink))
   , ((wmod,		    xK_w),	windows W.shiftMaster)
+  , ((wmod .|. shiftMask,   xK_w),	withFocused promptWindowOp)
   , ((wmod,		    xK_v),	windows W.swapDown)
   , ((wmod,		    xK_z),	windows $ W.shift $ show iconDesktop)
 
