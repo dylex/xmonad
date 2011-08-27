@@ -24,7 +24,7 @@ data Term = Term
 
 term :: Term
 term = Term
-  { terminal = "mrxvt"
+  { terminal = "drxvt"
   , termTitle = Nothing
   , termHold = False
   , termRun = Nothing
