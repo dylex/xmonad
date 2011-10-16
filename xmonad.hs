@@ -39,7 +39,7 @@ iconLayout = Tall 1 (1%32) (1%2) -- FIXME
 manager :: ManageHook
 manager = composeAll
   [ isElem title ["Stripchart","xeyes","xload","xdaliclock","Dali Clock","xrtail"] --> doIgnore
-  , isElem className ["feh","Gimp"] <||> isElem title ["Event Tester","MPlayer","2by2"] --> doFloat
+  , isElem className ["feh","Gimp","xmag"] <||> isElem title ["Event Tester","MPlayer","2by2"] --> doFloat
   , propertyToQuery isStuck --> ask >>= doF . stickWindow
   ]
 
@@ -199,4 +199,5 @@ main = do
  -   esc vs capslock bindings?
  -   mpc/dzen status
  -   transparent/root dzen
+ -   throttle logHook: update at most every second?
  -}
