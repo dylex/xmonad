@@ -23,7 +23,7 @@ deskChars = pagerDeskWidth `div` 5
 
 dzenArgs :: [String]
 dzenArgs = dzenDefaultArgs ++
-  ["-fn","-*-fixed-*-*-*-*-" ++ show fontSize ++ "-*-*-*-*-*-*-*"
+  ["-fn","-*-fixed-*-*-*-*-" ++ show fontSize ++ "-*-*-*-*-*-iso10646-1"
   ,"-l",show (pred $ topHeight `div` fontSize)
   ,"-h",show fontSize
   ,"-w",show pagerWidth

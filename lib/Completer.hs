@@ -19,7 +19,6 @@ module Completer
 import XMonad
 import XMonad.Prompt
 import Control.Monad
-import Control.Monad.State.Class
 import Data.Char
 import Data.List
 import qualified Data.Map as Map
