@@ -43,7 +43,9 @@ identWindow :: Window -> X ()
 identWindow w = io $ runOutput (Run "xprop" ["-id",show w]) >>= notify
 
 browser :: String
-browser = "firefox"
+browser 
+  | isExec "uzbl" = "uzbl"
+  | otherwise = "firefox"
 
 runBrowser :: Maybe String -> X ()
 runBrowser = run . Run browser . maybeToList
