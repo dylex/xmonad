@@ -1,5 +1,5 @@
 {-# OPTIONS -fno-warn-orphans #-}
-{-# LANGUAGE PatternGuards, MultiParamTypeClasses, TypeSynonymInstances, FlexibleInstances, FlexibleContexts, ScopedTypeVariables, ExistentialQuantification, StandaloneDeriving #-}
+{-# LANGUAGE PatternGuards, MultiParamTypeClasses, TypeSynonymInstances, FlexibleInstances, FlexibleContexts, ScopedTypeVariables, ExistentialQuantification #-}
 module Prompt
   ( promptRun
   , promptLogin
@@ -134,7 +134,7 @@ loginHost = suggest . oneOf =.< mapMaybe hostLine . lines =.< readFile' (home ++
 
 promptLogin :: X ()
 promptLogin = do
-  c <- io $ loginHost
+  c <- io loginHost
   prompt "ssh" c runLogin
 
 
@@ -187,7 +187,7 @@ ops defw = do
     xw f w = maybe (withFocused f) f $ fmap unName $ join w `coalesce` defw
     xd f = f . fromMaybe defd . fmap show
     xdw f dw = xw (xd f $ fmap headWord dw) $ tailWords =<< dw
-  return $ switchCmd $
+  return $ switchCmd
     [o_ "refresh"	refresh
     ,o_ "rescreen"	rescreen
     ,od "view"		$ windows . W.view
@@ -220,6 +220,6 @@ promptWindowOp w = do
   o <- ops (Just nw)
   prompt (show nw) o runOp
 
-runOp :: (Words Op OpClosure) -> X ()
+runOp :: Words Op OpClosure -> X ()
 runOp (Words (Op _ f) Nothing) = f
 runOp (Words _ (Just cc)) = runClosure cc

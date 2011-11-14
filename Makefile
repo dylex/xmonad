@@ -1,4 +1,6 @@
 BIN=xmonad-$(shell uname -m)-$(shell uname | tr A-Z a-z)
 $(BIN): xmonad.hs
 	ghc --make -O -dynamic -Wall $< -i -ilib -o $@
-.PHONY: $(BIN)
+clean:
+	rm -f $(BIN) *.hi *.o lib/*.hi lib/*.o
+.PHONY: $(BIN) clean

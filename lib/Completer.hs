@@ -1,4 +1,4 @@
-{-# LANGUAGE PatternGuards, MultiParamTypeClasses, TypeSynonymInstances, FlexibleInstances, FlexibleContexts, ScopedTypeVariables, ExistentialQuantification, StandaloneDeriving #-}
+{-# LANGUAGE PatternGuards, MultiParamTypeClasses, TypeSynonymInstances, FlexibleInstances, FlexibleContexts, ScopedTypeVariables, ExistentialQuantification #-}
 module Completer
   ( Output(..), outputAs
   , Completer, CS
@@ -138,7 +138,7 @@ instance MonadState String Completer where
   put s = Completer $ \_ -> return [((),s)]
 
 instance MonadIO Completer where
-  liftIO f = Completer $ \s -> f >>= return . return . with s
+  liftIO f = Completer $ \s -> f >.= return . with s
 
 whenNull :: [a] -> Completer a -> Completer a
 whenNull d c = Completer $ \s ->

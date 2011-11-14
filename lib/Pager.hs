@@ -42,7 +42,7 @@ data WinInfo = WinInfo
 getWinInfo :: WindowSet -> WindowSpace -> StackPos -> Window -> X WinInfo
 getWinInfo set _ws p w = do
   n <- show =.< getName w
-  return $ WinInfo
+  return WinInfo
     { win = w
     , winName = n
     , winPos = p

@@ -1,4 +1,4 @@
-{-# LANGUAGE PatternGuards, ForeignFunctionInterface, ScopedTypeVariables #-}
+{-# LANGUAGE PatternGuards, ScopedTypeVariables #-}
 module Util 
   ( first, second
   , ii
@@ -39,9 +39,9 @@ infixr 1 =.<, .=<
 (>=.) :: Monad m => (a -> m b) -> (b -> c) -> a -> m c
 (.=<) :: Monad m => (b -> c) -> (a -> m b) -> a -> m c
 
-(>.) e r = e >> return r
+(>.) e r = e >> return r -- flip (<$)
 (>.=) e r = e >>= return . r
-(=.<) r e = return . r =<< e
+(=.<) r e = return . r =<< e -- fmap, <$>, liftM
 (>=.) e r = e >=> return . r
 (.=<) r e = return . r <=< e
 

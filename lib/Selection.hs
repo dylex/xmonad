@@ -1,5 +1,4 @@
 {-# OPTIONS -Wall #-}
-{-# LANGUAGE PatternGuards #-}
 module Selection
   ( withSelection
   , selectionEventHook

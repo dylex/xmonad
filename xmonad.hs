@@ -1,4 +1,4 @@
-{-# LANGUAGE PatternGuards, FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts #-}
 import XMonad as X hiding (mouseResizeWindow)
 import qualified XMonad.StackSet as W
 import qualified XMonad.Actions.CopyWindow as XCW
@@ -95,7 +95,7 @@ bind =
   -- j
   -- k
   , ((wmod,		    xK_x),	kill)
-  , ((wmod,		    xK_b),	run $ RunShell $ "xbg && [ -p HOME/.xtail ] && touch HOME/.xtail")
+  , ((wmod,		    xK_b),	run $ RunShell "xbg && [ -p HOME/.xtail ] && touch HOME/.xtail")
   , ((wmod,		    xK_m),	withFocused floatAdjust)
   , ((wmod .|. shiftMask,   xK_m),	withFocused (windows . W.sink))
   , ((wmod,		    xK_w),	windows W.shiftMaster)
@@ -152,7 +152,7 @@ mouse = --map (\(mb, rf, wf) -> (mb, \w -> isRoot w >>= \r -> if r then rf else 
 
 startup :: Bool -> X ()
 startup new = do
-  updateLayout (show iconDesktop) $ Just $ Layout $ iconLayout
+  updateLayout (show iconDesktop) $ Just $ Layout iconLayout
   when new $ mapM_ (run . snd) startups
 
 main :: IO ()
@@ -160,7 +160,7 @@ main = do
   args <- getArgs
   let new = "--resume" `notElem` args
   pagerLog <- pagerStart
-  xmonad $ XConfig
+  xmonad XConfig
     { normalBorderColor = "#6060A0"
     , focusedBorderColor = "#E0E0A0"
     , X.terminal = Program.terminal term

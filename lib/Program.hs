@@ -62,7 +62,7 @@ startups = l pagerWidth where
       (geom 220 $ \g -> ("xdaliclock", nice ["-5","xdaliclock","-transparent","-hex","-noseconds","-fg",colorRootFG,"-fn","-*-luxi sans-medium-r-*-*-*-400-*-*-*-*-iso8859-1","-geometry",g]))
     $ lif hostHome
       (push (80*5) $ \x -> ("xrtail", nice ["-5","xrtail","-geom","80x7" ++ x ++ "+0","-fn","5x8","-fg",colorRootFG,home++"/.xrw"]))
-    $ const $
+    $ const
       -- FIXME -fn:
     [ ("stuck term", Run "xterm" ["-title","stuck term","-fn","-*-proggytiny-medium-*","-fb","-*-proggytiny-bold-*"{-,"-fn","6x10","-fb","6x10"-}])
     , ("xset", Run "xset" ["b","100","3520",show (if hostHome then 20 else 35 :: Int),"m","3","5","r","rate","250","30","s","0","+dpms","dpms","300","0","900"])

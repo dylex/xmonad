@@ -1,4 +1,4 @@
-{-# LANGUAGE PatternGuards, FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts #-}
 module Ops
   ( debug
   , isElem
@@ -79,21 +79,24 @@ runInput r i = do
   hPutStr hi i
   hClose hi
 
+readAll :: Handle -> IO String
+readAll h = do
+  -- FIXME: this is both wrong and wrong
+  o <- hGetContents h
+  o `seq` hClose h
+  return o
+
 runOutput :: Run -> IO String
 runOutput r = do
   (Nothing, Just ho, Nothing, _) <- createProcess (runCreateProcess r){ std_out = CreatePipe }
-  o <- hGetContents ho
-  o `seq` hClose ho
-  return o
+  readAll ho
 
 runIO :: Run -> String -> IO String
 runIO r i = do
   (Just hi, Just ho, Nothing, _) <- createProcess (runCreateProcess r){ std_in = CreatePipe, std_out = CreatePipe }
   hPutStr hi i
   hClose hi
-  o <- hGetContents ho
-  o `seq` hClose ho
-  return o
+  readAll ho
 
 type AtomCache = (String, IORef Atom)
 
@@ -115,7 +118,7 @@ warpFocus :: X ()
 warpFocus = XWarp.warpToWindow 0.5 0.5
 
 stickWindow :: Window -> WindowSet -> WindowSet
-stickWindow w s = foldr (XCW.copyWindow w) s $ map show desktops
+stickWindow w s = foldr (XCW.copyWindow w . show) s desktops
 
 switchWindow :: Window -> X ()
 switchWindow = sendMessage . SwitchWindow
