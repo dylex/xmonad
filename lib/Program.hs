@@ -88,9 +88,11 @@ programs = startups
   ++ prog "xmag"
   ++ prog "xfontsel"
   ++ prog "firefox"
-  ++ prog "chrome"
+  ++ prog "chromium"
+  ++ prog "uzbl"
   ++ prog "nethack"
   ++ prog "xkill"
+  ++ progArgs "tmux" ["-f",home++"/.xtmux.conf","-x"]
   where
   prog p = progArgs p []
   progArgs p a

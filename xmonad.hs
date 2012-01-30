@@ -168,7 +168,6 @@ main = do
     , manageHook = manager
     , handleEventHook = serverEventHook `mappend` selectionEventHook
     , X.workspaces = map show desktopsAll
-    , numlockMask = mod2Mask
     , modMask = wmod
     , keys = const $ Map.fromList bind
     , mouseBindings = const $ Map.fromList mouse
