@@ -38,7 +38,7 @@ iconLayout = Tall 1 (1%32) (1%2) -- FIXME
 
 manager :: ManageHook
 manager = composeAll
-  [ isElem title ["Stripchart","xeyes","xload","xdaliclock","Dali Clock","xrtail"] --> doIgnore
+  [ isElem title ["Stripchart","xeyes","xload","xdaliclock","Dali Clock","xrtail"] <||> isElem className ["Gomp"] --> doIgnore
   , isElem className ["feh","Gimp","xmag"] <||> isElem title ["Event Tester","MPlayer","2by2"] --> doFloat
   , propertyToQuery isStuck --> ask >>= doF . stickWindow
   ]
