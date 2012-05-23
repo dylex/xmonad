@@ -90,7 +90,6 @@ programs = startups
   ++ prog "firefox"
   ++ prog "chromium"
   ++ prog "uzbl"
-  ++ prog "nethack"
   ++ prog "xkill"
   ++ progArgs "tmux" ["-f",home++"/.xtmux.conf","-x"]
   where

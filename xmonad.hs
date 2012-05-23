@@ -41,6 +41,7 @@ manager = composeAll
   [ isElem title ["Stripchart","xeyes","xload","xdaliclock","Dali Clock","xrtail"] <||> isElem className ["Gomp"] --> doIgnore
   , isElem className ["feh","Gimp","xmag"] <||> isElem title ["Event Tester","MPlayer","2by2"] --> doFloat
   , propertyToQuery isStuck --> ask >>= doF . stickWindow
+  , title =? "xconsole" --> doShift (show (pred maxBound :: Desktop))
   ]
 
 bind :: [((KeyMask, KeySym), X ())]
