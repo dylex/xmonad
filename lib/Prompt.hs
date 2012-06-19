@@ -3,6 +3,7 @@
 module Prompt
   ( promptRun
   , promptLogin
+  , promptTmux
   , promptOp, promptWindowOp
   ) where
 
@@ -123,6 +124,18 @@ runInTerm c = runTerm $ term{ termTitle = Just (output c), termHold = True, term
 runProg :: Either String ShellCommand -> X ()
 runProg (Left p) = run $ fromJust $ lookup p programs
 runProg (Right c) = run (shellCommandRun c)
+
+
+tmuxSession :: IO CS
+tmuxSession = suggest . oneOf =.< lines =.< runOutput (Run "tmux" ["list-sessions","-F","#{session_name}"])
+
+runTmux :: String -> X ()
+runTmux a = run (RunShell ("tm -x " ++ a))
+
+promptTmux :: X ()
+promptTmux = do
+  c <- io tmuxSession
+  prompt "xtmux" c runTmux
 
 
 loginHost :: IO CS

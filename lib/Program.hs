@@ -91,7 +91,6 @@ programs = startups
   ++ prog "chromium"
   ++ prog "uzbl"
   ++ prog "xkill"
-  ++ progArgs "tmux" ["-f",home++"/.xtmux.conf","-x"]
   where
   prog p = progArgs p []
   progArgs p a

@@ -83,6 +83,7 @@ bind =
   , ((wmod,		    xK_h),	windows $ viewDesk predWrap)
   , ((wmod .|. shiftMask,   xK_h),	windows $ viewDesk predWrap . shiftDesk predWrap)
   , ((wmod,		    xK_t),	sendMessage $ SplitModifies W.focusUp')
+  , ((wmod .|. shiftMask,   xK_t),	promptTmux)
   , ((wmod,		    xK_n),	sendMessage $ SplitModifies W.focusDown')
   , ((wmod,		    xK_s),	windows $ viewDesk succWrap)
   , ((wmod .|. shiftMask,   xK_s),	windows $ viewDesk succWrap . shiftDesk succWrap)
