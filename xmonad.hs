@@ -108,12 +108,14 @@ bind =
   , ((wmod,		    xK_space),	refresh)
   , ((wmod .|. controlMask, xK_space),	restart "xmonad" True)
 
-  , ((0,         xF86XK_AudioLowerVolume),  mixerSet LT 1)
-  , ((0,         xF86XK_AudioRaiseVolume),  mixerSet GT 1)
-  , ((wmod .|. shiftMask, xK_KP_Add),	    mixerSet LT 1)
-  , ((wmod .|. shiftMask, xK_KP_Subtract),  mixerSet GT 1)
-  , ((wmod,               xK_KP_Enter),	    mixerSet EQ 12)
-  , ((wmod .|. shiftMask, xK_KP_Enter),	    mixerSet EQ 75)
+  , ((0,        xF86XK_AudioLowerVolume), mixerSet LT 1)
+  , ((0,        xF86XK_AudioRaiseVolume), mixerSet GT 1)
+  , ((wmod .|. shiftMask, xK_KP_Add),	  mixerSet LT 1)
+  , ((wmod .|. shiftMask, xK_KP_Subtract),mixerSet GT 1)
+  , ((wmod,               xK_KP_Enter),	  mixerSet EQ 12)
+  , ((wmod .|. shiftMask, xK_KP_Enter),	  mixerSet EQ 75)
+  , ((0,        xF86XK_AudioMute),	  mixerSet EQ 12)
+  , ((shiftMask, xF86XK_AudioMute),       mixerSet EQ 75)
   , ((wmod .|. shiftMask, xK_KP_Insert),  mpc "-p")
   , ((mod5Mask,           xK_KP_Insert),  mpc "-p")
   , ((wmod .|. shiftMask, xK_KP_Delete),  mpc "-r")
@@ -131,17 +133,23 @@ bind =
 
   , ((wmod .|. shiftMask, xK_Prior),	run $ if hostName == "pancake" then Run "/usr/sbin/setcx" ["C1"] else Run "eject" [])
   , ((wmod .|. shiftMask, xK_Next),	run $ if hostName == "pancake" then Run "/usr/sbin/setcx" ["C3"] else Run "eject" ["-t"])
+
+  , ((0,                  xK_F9),       sendMessage $ SplitModifies W.focusUp')
+  , ((0,                  xK_F10),      sendMessage $ SplitModifies W.focusDown')
+  , ((0,                  xK_F11),      toggleWS)
+  , ((0,                  xK_F12),      sendMessage SwitchFocus)
   ]
   ++ zipWith (\i fk -> 
-    ((0, fk),		windows $ W.view $ show i)) desktops [xK_F1..]
+    ((0, fk),		windows $ W.view $ show i)) desktops fkeys
   ++ zipWith (\i fk -> 
-    ((shiftMask, fk),	windows $ W.shift $ show i)) desktops [xK_F1..]
+    ((shiftMask, fk),	windows $ W.shift $ show i)) desktops fkeys
   ++ zipWith (\i fk -> 
     ((wmod, fk),	windows $ W.view $ show i)) desktops (xK_grave:[xK_1..])
   ++ zipWith (\i fk -> 
     ((wmod .|. shiftMask, fk),	windows $ W.shift $ show i)) desktops (xK_grave:[xK_1..])
   where
     mpc = run . Run "mpc" . words
+    fkeys = xK_F13 : [xK_F1..]
 
 mouse :: [((KeyMask, Button), Window -> X ())]
 mouse = --map (\(mb, rf, wf) -> (mb, \w -> isRoot w >>= \r -> if r then rf else wf w)) $
