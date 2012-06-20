@@ -29,7 +29,7 @@ import Selection
 isStuck :: Property
 isStuck = Title "stuck term"
 
-layout = lessBorders OnlyFloat $ splitLayout (R, 8+80*6) isStuck lmain lstuck
+layout = lessBorders OnlyFloat $ splitLayout (L, 8+80*6) isStuck lmain lstuck
   where
   lmain = Full ||| Tall 1 (1%32) (1%2) ||| Column 1
   lstuck = Column 1
