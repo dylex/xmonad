@@ -67,7 +67,7 @@ startups = l pagerWidth where
     $ const
       -- FIXME -fn:
     [ ("stuck term", Run "xterm" ["-title","stuck term","-fn","-*-proggytiny-medium-*","-fb","-*-proggytiny-bold-*"{-,"-fn","6x10","-fb","6x10"-}])
-    , ("xset", Run "xset" ["b","100","3520","20","m","5/4","0","r","rate","250","30","s","0","+dpms","dpms","300","0","900"])
+    , ("xset", Run "xset" ["b","100","3520","20","m","3/2","0","r","rate","250","30","s","0","+dpms","dpms","300","0","900"])
     ] 
 --    ++ guard1 (isExec "xbg") ("xbg", Run "xbg" [])
   push w f r x = f ('+' : show x) : r x' where x' = x+w
