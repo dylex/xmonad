@@ -149,7 +149,7 @@ bind =
     ((wmod .|. shiftMask, fk),	windows $ W.shift $ show i)) desktops (xK_grave:[xK_1..])
   where
     mpc = run . Run "mpc" . words
-    fkeys = xK_F13 : [xK_F1..]
+    fkeys = (if hostHome then (xK_F13 :) else id) [xK_F1..]
 
 mouse :: [((KeyMask, Button), Window -> X ())]
 mouse = --map (\(mb, rf, wf) -> (mb, \w -> isRoot w >>= \r -> if r then rf else wf w)) $
