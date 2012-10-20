@@ -54,6 +54,7 @@ bind =
   -- xK_period
   -- xK_p
   --, ((wmod,		    xK_p),	withSelection trace)
+  , ((wmod .|. shiftMask,   xK_p),      promptClipID)
   -- xK_y
   , ((wmod,		    xK_f),	runBrowser Nothing)
   , ((wmod .|. shiftMask,   xK_f),	withSelection $ runBrowser . Just)

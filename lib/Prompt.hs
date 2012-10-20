@@ -5,6 +5,7 @@ module Prompt
   , promptLogin
   , promptTmux
   , promptOp, promptWindowOp
+  , promptClipID
   ) where
 
 import XMonad
@@ -14,6 +15,7 @@ import qualified XMonad.Actions.CopyWindow as XCW
 import XMonad.Util.NamedWindows
 import Control.Exception (catch, IOException)
 import Control.Monad
+import Data.List
 import Data.Maybe
 import Data.Monoid
 import qualified Data.Set as Set
@@ -237,3 +239,25 @@ promptWindowOp w = do
 runOp :: Words Op OpClosure -> X ()
 runOp (Words (Op _ f) Nothing) = f
 runOp (Words _ (Just cc)) = runClosure cc
+
+
+readIDs :: IO [(String,String)]
+readIDs = mapMaybe idLine . lines =.< readFile' (home ++ "/doc/id") where
+  idLine s
+    | (i,':':' ':p) <- break (':' ==) s = Just (i,p)
+    | otherwise = Nothing
+
+clipIDs :: IO CS
+clipIDs = oneOf . map fst =.< readIDs
+
+promptClipID :: X ()
+promptClipID = do
+  o <- io clipIDs
+  prompt "clipid" o runClipID
+
+runClipID :: String -> X ()
+runClipID i = io $ do
+  ids <- readIDs
+  case filter (isPrefixOf i . fst) ids of
+    [(_,s)] | (p:_) <- words s -> runInput (Run "xclip" ["-i","-l","1"]) p
+    _ -> nop
