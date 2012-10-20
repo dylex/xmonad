@@ -12,6 +12,7 @@ import XMonad.Prompt
 import qualified XMonad.StackSet as W
 import qualified XMonad.Actions.CopyWindow as XCW
 import XMonad.Util.NamedWindows
+import Control.Exception (catch, IOException)
 import Control.Monad
 import Data.Maybe
 import Data.Monoid
@@ -25,12 +26,12 @@ import Program
 import Completer
 
 readFile' :: String -> IO String
-readFile' f = readFile f `catch` \_ -> return ""
+readFile' f = readFile f `catch` \(_ :: IOException) -> return ""
 
 readDir' :: Bool -> String -> IO [String]
 readDir' dots "" = readDir' dots "."
 readDir' False d = filter (('.' /=) . head) =.< readDir' True d
-readDir' True d = getDirectoryContents d `catch` \_ -> return []
+readDir' True d = getDirectoryContents d `catch` \(_ :: IOException) -> return []
 
 breakLast :: (a -> Bool) -> [a] -> ([a], [a])
 breakLast f s = fromMaybe ([],s) $ bl s where

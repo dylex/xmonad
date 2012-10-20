@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, ScopedTypeVariables #-}
 module Param
   ( osName
   , hostName, hostHome
@@ -15,6 +15,7 @@ module Param
   ) where
 
 import XMonad as X hiding (terminal)
+import Control.Exception (catch, IOException)
 import Data.Ix
 import Data.Maybe
 import qualified System.Directory
@@ -82,5 +83,5 @@ isExec = unsafePerformIO . (isJust .=< System.Directory.findExecutable)
 isFont :: String -> X Bool
 isFont f = withDisplay $ \dpy -> io $ catch 
   (loadQueryFont dpy f >>= freeFont dpy >. True)
-  (const $ return False)
+  (\(_ :: IOException) -> return False)
 
