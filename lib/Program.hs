@@ -80,6 +80,7 @@ startups = l pagerWidth where
 programs :: [(String, Run)]
 programs = startups
   ++ guard1 hostHome ("vnc-greed", Run "vncviewer" ["localhost:28659"])
+  ++ guard1 hostHome ("vnc-wampum", Run "vncviewer" ["localhost:14059"])
   ++ prog "gnumeric"
   ++ prog "gimp"
   ++ prog "xfig"
@@ -99,7 +100,7 @@ programs = startups
 
 mixerSet :: MonadIO m => Ordering -> Int -> m ()
 mixerSet d n 
-  | osName == "Linux" = run $ Run "amixer" ["-q","-D","main","set","Master",show n ++ dirSign d]
+  | osName == "Linux" = run $ Run "amixer" ["-q","-D","main","set",if hostHome then "Wave" else "Master","playback",show n ++ dirSign d]
   | osName == "FreeBSD" = run $ Run "/usr/sbin/mixer" [if hostName == "druid" then "ogain" else "vol",dirSign d ++ show n]
   | otherwise = nop
   where
