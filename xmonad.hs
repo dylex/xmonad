@@ -198,6 +198,7 @@ main = do
 	serverInit
 	startup new
     , focusFollowsMouse = True
+    , clickJustFocuses = False
     }
 
 {- TODO:
