@@ -11,6 +11,7 @@ module Program
 
 import XMonad as X hiding (terminal)
 import Data.Maybe
+import System.FilePath
 import Util
 import Param
 import Ops
@@ -63,7 +64,7 @@ startups = l pagerWidth where
     $ lif (isExec "xdaliclock")
       (geom 220 $ \g -> ("xdaliclock", nice ["-5","xdaliclock","-transparent","-hex","-noseconds","-fg",colorRootFG,"-fn","-*-luxi sans-medium-r-*-*-*-400-*-*-*-*-iso8859-1","-geometry",g]))
     $ lif hostHome
-      (push (80*5) $ \x -> ("xrtail", nice ["-5","xrtail","-geom","80x7" ++ x ++ "+0","-fn","5x8","-fg",colorRootFG,home++"/.xrw"]))
+      (push (80*5) $ \x -> ("xrtail", nice ["-5","xrtail","-geom","80x7" ++ x ++ "+0","-fn","5x8","-fg",colorRootFG,home</>".xrw"]))
     $ const
       -- FIXME -fn:
     [ ("stuck term", Run "xterm" ["-title","stuck term","-fn","-dylex-terminal-medium-r-*-*-10-*","-fb","-dylex-terminal-bold-r-*-*-10-*"])
@@ -92,6 +93,7 @@ programs = startups
   ++ prog "chromium"
   ++ prog "uzbl"
   ++ prog "xkill"
+  ++ guard1 (isExec "tmux") ("xtmux", Run "tmux" ["-f",home</>".xtmux.conf","-x"])
   where
   prog p = progArgs p []
   progArgs p a
