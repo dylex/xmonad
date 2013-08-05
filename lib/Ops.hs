@@ -118,7 +118,7 @@ warpFocus :: X ()
 warpFocus = XWarp.warpToWindow 0.5 0.5
 
 stickWindow :: Window -> WindowSet -> WindowSet
-stickWindow w s = foldr (XCW.copyWindow w . show) s desktops
+stickWindow w s = foldr (XCW.copyWindow w . show) s (init desktops)
 
 switchWindow :: Window -> X ()
 switchWindow = sendMessage . SwitchWindow
