@@ -110,7 +110,9 @@ bind =
   , ((wmod .|. controlMask, xK_space),	restart "xmonad" True)
 
   , ((0,        xF86XK_AudioLowerVolume), mixerSet LT 1)
+  , ((shiftMask,xF86XK_AudioLowerVolume), mixerSet LT 10)
   , ((0,        xF86XK_AudioRaiseVolume), mixerSet GT 1)
+  , ((shiftMask,xF86XK_AudioRaiseVolume), mixerSet GT 10)
   , ((wmod .|. shiftMask, xK_KP_Add),	  mixerSet LT 1)
   , ((wmod .|. shiftMask, xK_KP_Subtract),mixerSet GT 1)
   , ((wmod,               xK_KP_Enter),	  mixerSet EQ 12)
