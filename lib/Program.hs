@@ -25,7 +25,7 @@ data Term = Term
 
 term :: Term
 term = Term
-  { terminal = "drxvt"
+  { terminal = if isExec "drxvt" then "drxvt" else "xterm"
   , termTitle = Nothing
   , termHold = False
   , termRun = Nothing
