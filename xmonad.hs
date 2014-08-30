@@ -39,7 +39,7 @@ iconLayout = Tall 1 (1%32) (1%2) -- FIXME
 manager :: ManageHook
 manager = composeAll
   [ isElem title ["Stripchart","xeyes","xload","xdaliclock","Dali Clock","xrtail"] <||> isElem className ["Gomp"] --> doIgnore
-  , isElem className ["feh","Gimp","xmag"] <||> isElem title ["Event Tester","MPlayer","2by2"] --> doFloat
+  , isElem className ["feh","Gimp","xmag"] <||> isElem title ["Event Tester","MPlayer","unblend"] --> doFloat
   , propertyToQuery isStuck --> ask >>= doF . stickWindow
   , title =? "xconsole" --> doShift (show (pred maxBound :: Desktop))
   ]
@@ -80,7 +80,7 @@ bind =
   , ((wmod,		    xK_i),	withFocused (\w -> io $ runProcessWithInput "xprop" ["-id",show w] "" >>= notify))
   --, ((wmod .|. shiftMask,   xK_i),	runLogin "icicle")
   , ((wmod,		    xK_d),	sendMessage SwitchFocus) -- nextScreen
-  , ((wmod .|. shiftMask,   xK_d),	if hostHome then run $ Run "tm" ["-x","main"] else runLogin "dylex")
+  , ((wmod .|. shiftMask,   xK_d),	run $ Run "tm" ["-x","main"])
   , ((wmod,		    xK_h),	windows $ viewDesk predWrap)
   , ((wmod .|. shiftMask,   xK_h),	windows $ viewDesk predWrap . shiftDesk predWrap)
   , ((wmod,		    xK_t),	sendMessage $ SplitModifies W.focusUp')
