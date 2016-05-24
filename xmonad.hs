@@ -12,7 +12,6 @@ import XMonad.Util.Types
 import XMonad.Util.WindowProperties
 import Control.Monad
 import qualified Data.Map as Map
-import Data.Monoid
 import Data.Ratio ((%))
 import System.Environment
 import System.Exit
@@ -34,6 +33,7 @@ layout = lessBorders OnlyFloat $ splitLayout (L, 8+80*6) isStuck lmain lstuck
   lmain = Full ||| Tall 1 (1%32) (1%2) ||| Column 1
   lstuck = Column 1
 
+iconLayout :: Tall a
 iconLayout = Tall 1 (1%32) (1%2) -- FIXME
 
 manager :: ManageHook
@@ -181,7 +181,7 @@ main = do
   args <- getArgs
   let new = "--resume" `notElem` args
   pagerLog <- pagerStart
-  xmonad defaultConfig
+  xmonad def
     { normalBorderColor = "#6060A0"
     , focusedBorderColor = "#E0E0A0"
     , X.terminal = Program.terminal term

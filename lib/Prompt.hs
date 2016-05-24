@@ -17,7 +17,6 @@ import Control.Exception (catch, IOException)
 import Control.Monad
 import Data.List
 import Data.Maybe
-import Data.Monoid
 import qualified Data.Set as Set
 import System.Directory
 import System.FilePath
@@ -69,7 +68,7 @@ instance XPrompt Prompt where
   nextCompletion _ = getNextCompletion
 
 xpConfig :: XPConfig
-xpConfig = defaultXPConfig
+xpConfig = def
   { bgColor = "#cccccc"
   , fgColor = "#000000"
   , bgHLight = "#000000"
