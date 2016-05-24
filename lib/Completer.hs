@@ -16,8 +16,10 @@ module Completer
   , pureCompleter1
   ) where
 
+import Prelude hiding (Word)
 import XMonad
 import XMonad.Prompt
+import Control.Applicative (Applicative(..))
 import Control.Monad
 import Data.Char
 import Data.List
@@ -128,8 +130,12 @@ instance Nullable (Completer a) where
 instance Functor Completer where 
   fmap = liftC . map . first
 
+instance Applicative Completer where
+  pure = pureCompleter1 . (,)
+  f <*> a = f >>= (`fmap` a)
+
 instance Monad Completer where
-  return = pureCompleter1 . (,)
+  return = pure
   fail = Completer . const . fail -- Completer $ const $ return []
   m >>= f = Completer $ runCompleter m >=> concatMapM (uncurry $ runCompleter . f)
 

@@ -83,7 +83,7 @@ readAll :: Handle -> IO String
 readAll h = do
   -- FIXME: this is both wrong and wrong
   o <- hGetContents h
-  o `seq` hClose h
+  -- o `seq` hClose h
   return o
 
 runOutput :: Run -> IO String
