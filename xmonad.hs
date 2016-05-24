@@ -140,6 +140,11 @@ bind =
   , ((wmod .|. shiftMask, xK_Prior),	run $ if hostName == "pancake" then Run "/usr/sbin/setcx" ["C1"] else Run "eject" [])
   , ((wmod .|. shiftMask, xK_Next),	run $ if hostName == "pancake" then Run "/usr/sbin/setcx" ["C3"] else Run "eject" ["-t"])
 
+  , ((0,        xF86XK_MonBrightnessDown), run $ Run "light" ["-U", "1"])
+  , ((shiftMask,xF86XK_MonBrightnessDown), run $ Run "light" ["-U", "10"])
+  , ((0,        xF86XK_MonBrightnessUp), run $ Run "light" ["-A", "1"])
+  , ((shiftMask,xF86XK_MonBrightnessUp), run $ Run "light" ["-A", "10"])
+
   , ((0,                  xK_F9),       sendMessage $ SplitModifies W.focusUp')
   , ((0,                  xK_F10),      sendMessage $ SplitModifies W.focusDown')
   , ((0,                  xK_F11),      toggleWS)
