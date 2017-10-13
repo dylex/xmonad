@@ -181,7 +181,7 @@ main = do
   args <- getArgs
   let new = "--resume" `notElem` args
   pagerLog <- pagerStart
-  xmonad def
+  xmonad def -- TODO: use launch, restart
     { normalBorderColor = "#6060A0"
     , focusedBorderColor = "#E0E0A0"
     , X.terminal = Program.terminal term

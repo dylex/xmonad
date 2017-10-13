@@ -80,8 +80,6 @@ startups = l pagerWidth where
 
 programs :: [(String, Run)]
 programs = startups
-  ++ guard1 hostHome ("vnc-greed", Run "vncviewer" ["localhost:28659"])
-  ++ guard1 hostHome ("vnc-wampum", Run "vncviewer" ["localhost:14059"])
   ++ prog "gnumeric"
   ++ prog "gimp"
   ++ prog "xfig"
