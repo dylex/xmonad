@@ -4,6 +4,7 @@ import qualified XMonad.StackSet as W
 import qualified XMonad.Actions.CopyWindow as XCW
 import XMonad.Actions.CycleWS
 import XMonad.Actions.FlexibleResize
+import XMonad.Actions.FloatKeys
 import XMonad.Hooks.SetWMName (setWMName)
 import XMonad.Layout.Column
 import XMonad.Layout.NoBorders
@@ -136,9 +137,14 @@ bind =
   , ((mod5Mask,           xK_Right),	  mpc "-s +0:10")
   , ((mod5Mask,           xK_Down),	  mpc "-s -1")
   , ((mod5Mask,           xK_Up),	  mpc "-s +1")
-
-  , ((wmod .|. shiftMask, xK_Prior),	run $ if hostName == "pancake" then Run "/usr/sbin/setcx" ["C1"] else Run "eject" [])
-  , ((wmod .|. shiftMask, xK_Next),	run $ if hostName == "pancake" then Run "/usr/sbin/setcx" ["C3"] else Run "eject" ["-t"])
+  , ((wmod .|. controlMask, xK_Left),     withFocused $ keysMoveWindow (-1,  0))
+  , ((wmod .|. controlMask, xK_Right),    withFocused $ keysMoveWindow ( 1,  0))
+  , ((wmod .|. controlMask, xK_Up),       withFocused $ keysMoveWindow ( 0, -1))
+  , ((wmod .|. controlMask, xK_Down),     withFocused $ keysMoveWindow ( 0,  1))
+  , ((wmod .|. controlMask .|. shiftMask, xK_Left),     withFocused $ keysResizeWindow (-1,  0) (0, 0))
+  , ((wmod .|. controlMask .|. shiftMask, xK_Right),    withFocused $ keysResizeWindow ( 1,  0) (0, 0))
+  , ((wmod .|. controlMask .|. shiftMask, xK_Up),       withFocused $ keysResizeWindow ( 0, -1) (0, 0))
+  , ((wmod .|. controlMask .|. shiftMask, xK_Down),     withFocused $ keysResizeWindow ( 0,  1) (0, 0))
 
   , ((0,        xF86XK_MonBrightnessDown), run $ Run "light" ["-U", "1"])
   , ((shiftMask,xF86XK_MonBrightnessDown), run $ Run "light" ["-U", "10"])
