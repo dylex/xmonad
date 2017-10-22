@@ -137,6 +137,9 @@ bind =
   , ((mod5Mask,           xK_Right),	  mpc "-s +0:10")
   , ((mod5Mask,           xK_Down),	  mpc "-s -1")
   , ((mod5Mask,           xK_Up),	  mpc "-s +1")
+  , ((wmod .|. shiftMask, xK_Prior),      run $ Run "eject" [])
+  , ((wmod .|. shiftMask, xK_Next),       run $ Run "eject" ["-t"])
+
   , ((wmod .|. controlMask, xK_Left),     withFocused $ keysMoveWindow (-1,  0))
   , ((wmod .|. controlMask, xK_Right),    withFocused $ keysMoveWindow ( 1,  0))
   , ((wmod .|. controlMask, xK_Up),       withFocused $ keysMoveWindow ( 0, -1))
