@@ -62,6 +62,7 @@ bind =
   , ((wmod .|. shiftMask,   xK_g),	withSelection $ \u -> run $ Run "elinks" ["-remote",u])
   , ((wmod,		    xK_c),	windows (W.swapUp . W.focusDown))
   , ((wmod .|. shiftMask,   xK_c),	promptRun False)
+  , ((wmod .|. controlMask, xK_c),	run $ RunShell "xclip -o -selection primary | xclip -i -selection clipboard")
   , ((wmod,		    xK_r),	windows (W.shiftMaster . W.focusUp))
   , ((wmod .|. shiftMask,   xK_r),	promptLogin)
   , ((wmod,		    xK_l),	runTerm term)
@@ -105,6 +106,7 @@ bind =
   , ((wmod,		    xK_w),	windows W.shiftMaster)
   , ((wmod .|. shiftMask,   xK_w),	withFocused promptWindowOp)
   , ((wmod,		    xK_v),	windows W.swapDown)
+  , ((wmod .|. controlMask, xK_v),	run $ RunShell "xclip -o -selection clipboard | xclip -i -selection primary")
   , ((wmod,		    xK_z),	windows $ W.shift $ show iconDesktop)
 
   , ((wmod,		    xK_space),	refresh)
