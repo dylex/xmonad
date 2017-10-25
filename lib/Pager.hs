@@ -2,18 +2,19 @@ module Pager
   ( pagerStart
   ) where
 
-import XMonad as X
-import qualified XMonad.StackSet as W
-import XMonad.Util.NamedWindows
-import Control.Monad
-import Data.List
+import           Control.Monad (mapAndUnzipM)
+import           Data.List (find, transpose)
 import qualified Data.Map as Map
-import Data.Maybe
-import System.IO
-import Util
-import Param
-import Server
-import Dzen
+import           Data.Maybe (fromJust)
+import           System.IO (Handle, hPutStrLn, hFlush)
+import qualified XMonad as X
+import qualified XMonad.StackSet as W
+import           XMonad.Util.NamedWindows (getName)
+
+import           Util
+import           Param
+import           Server
+import           Dzen
 
 fontSize :: Int
 fontSize = 8
@@ -33,13 +34,13 @@ dzenArgs = dzenDefaultArgs ++
 data StackPos = Up | Focus | Down deriving (Eq, Ord)
 
 data WinInfo = WinInfo
-  { win :: Window
+  { win :: X.Window
   , winName :: String
   , winPos :: !StackPos
   , winFloat :: !Bool
   }
 
-getWinInfo :: WindowSet -> WindowSpace -> StackPos -> Window -> X WinInfo
+getWinInfo :: X.WindowSet -> X.WindowSpace -> StackPos -> X.Window -> X.X WinInfo
 getWinInfo set _ws p w = do
   n <- show =.< getName w
   return WinInfo
@@ -49,14 +50,14 @@ getWinInfo set _ws p w = do
     , winFloat = w `Map.member` W.floating set
     }
 
-getWinList :: WindowSet -> WindowSpace -> X [WinInfo]
+getWinList :: X.WindowSet -> X.WindowSpace -> X.X [WinInfo]
 getWinList _ (W.Workspace{ W.stack = Nothing }) = return []
 getWinList set ws@(W.Workspace{ W.stack = Just (W.Stack f u d) }) = mapM (uncurry $ getWinInfo set ws) $ (Focus,f) : map ((,) Up) u ++ map ((,) Down) d
 
 winInfo :: WinInfo -> Int -> String
 winInfo w l = dzenClickArea 3 ServerCommandWindowMenu [ii $ win w] $ take l $ winName w
 
-deskInfo :: WindowSet -> Desktop -> WindowSpace -> X (String, [String])
+deskInfo :: X.WindowSet -> Desktop -> X.WindowSpace -> X.X (String, [String])
 deskInfo set d = wins >=. \(wm:wl) -> (line True wm, map (line False) wl) where
   line top w =
     (if cur then "pa"^/show (i*pagerDeskWidth) ++ "fg"^/"#404080" ++ "r"^/(show pagerDeskWidth ++ "x" ++ show fontSize) else "")
@@ -73,12 +74,12 @@ deskInfo set d = wins >=. \(wm:wl) -> (line True wm, map (line False) wl) where
     | cur = "#408040"
     | otherwise = "#004000"
   wins ws@(W.Workspace{ W.stack = Just _ }) = getWinList set ws
-  wins _ = asks theRoot >.= \r -> [WinInfo r tag Down False]
+  wins _ = X.asks X.theRoot >.= \r -> [WinInfo r tag Down False]
   cur = tag == W.currentTag set
   tag = show d
   i = fromEnum d
 
-iconInfo :: WindowSet -> WindowSpace -> X String
+iconInfo :: X.WindowSet -> X.WindowSpace -> X.X String
 iconInfo set ws = unwords . map icon =.< getWinList set ws where
   icon w =
     "fg"^/(if winPos w == Focus then "#FFFFC0" else "#C0C0F0")
@@ -87,19 +88,19 @@ iconInfo set ws = unwords . map icon =.< getWinList set ws where
       (winInfo w 60)
     ++ "ib"^/"1"
 
-pagerLog :: Handle -> X ()
+pagerLog :: Handle -> X.X ()
 pagerLog h = do
-  s <- gets windowset
+  s <- X.gets X.windowset
   let ws = W.workspaces s
       fd i = fromJust $ find ((i ==) . W.tag) ws
   (tl,bll) <- mapAndUnzipM (\i -> deskInfo s i $ fd $ show i) desktops
   il <- iconInfo s (fd $ show iconDesktop)
-  io $ do
+  X.io $ do
   hPutStrLn h $ "^cs()\n^tw()" 
     ++ concat tl
     ++ '\n' : unlines (map concat (transpose bll))
     ++ "bg"^/"#400000" ++ il
   hFlush h
 
-pagerStart :: IO (X ())
+pagerStart :: IO (X.X ())
 pagerStart = pagerLog =.< runDzen dzenArgs

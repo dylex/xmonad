@@ -14,18 +14,20 @@ module Param
   , isFont
   ) where
 
-import XMonad as X hiding (terminal)
-import Control.Exception (catch, IOException)
-import Data.Ix
-import Data.Maybe
+import           Control.Exception (catch, IOException)
+import           Data.Ix (Ix)
+import           Data.List (isPrefixOf)
+import           Data.Maybe (isJust)
 import qualified System.Directory
-import System.Environment
-import System.IO.Unsafe
-import System.Posix.Unistd
-import Util
+import           System.Environment (getEnv)
+import           System.IO.Unsafe (unsafeDupablePerformIO)
+import           System.Posix.Unistd (SystemID, getSystemID, systemName, nodeName)
+import qualified XMonad as X
+
+import           Util
 
 systemID :: SystemID
-systemID = unsafePerformIO getSystemID
+systemID = unsafeDupablePerformIO getSystemID
 
 osName :: String
 osName = systemName systemID
@@ -37,7 +39,7 @@ hostHome :: Bool
 hostHome = hostName == "datura"
 
 home :: String
-home = unsafePerformIO $ getEnv "HOME"
+home = unsafeDupablePerformIO $ getEnv "HOME"
 
 newtype Desktop = Desktop { _unDesktop :: Int } deriving (Eq, Ord, Enum, Ix)
 
@@ -63,8 +65,8 @@ instance Read Desktop where
 topHeight :: Int
 topHeight = 50
 
-wmod :: KeyMask
-wmod = mod4Mask -- mod1Mask
+wmod :: X.KeyMask
+wmod = X.mod4Mask -- mod1Mask
 
 type COLOR = String
 
@@ -72,16 +74,17 @@ colorRootFG :: COLOR
 colorRootFG = "#FFFFBB"
 
 pagerDeskWidth :: Int
-pagerDeskWidth = 75
+pagerDeskWidth | hdpi      = 140
+               | otherwise = 75
 
 pagerWidth :: Int
 pagerWidth = pagerDeskWidth*length desktops
 
 isExec :: String -> Bool
-isExec = unsafePerformIO . (isJust .=< System.Directory.findExecutable)
+isExec = unsafeDupablePerformIO . (isJust .=< System.Directory.findExecutable)
 
-isFont :: String -> X Bool
-isFont f = withDisplay $ \dpy -> io $ catch 
-  (loadQueryFont dpy f >>= freeFont dpy >. True)
+isFont :: String -> X.X Bool
+isFont f = X.withDisplay $ \dpy -> X.io $ catch 
+  (X.loadQueryFont dpy f >>= X.freeFont dpy >. True)
   (\(_ :: IOException) -> return False)
 

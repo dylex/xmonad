@@ -9,12 +9,13 @@ module Program
   , mixerSet
   ) where
 
-import XMonad as X hiding (terminal)
-import Data.Maybe
-import System.FilePath
-import Util
-import Param
-import Ops
+import           Data.Maybe (maybeToList)
+import           System.FilePath ((</>))
+import qualified XMonad as X
+
+import           Util
+import           Param
+import           Ops
 
 data Term = Term 
   { terminal :: String
@@ -31,27 +32,27 @@ term = Term
   , termRun = Nothing
   }
 
-runTerm :: MonadIO m => Term -> m ()
+runTerm :: X.MonadIO m => Term -> m ()
 runTerm t = run $ Run (terminal t) $
   maybe [] (\n -> ["-title",n]) (termTitle t)
   ++ (if termHold t then ["-hold","1"] else [])
   ++ maybe [] (("-e":) . unRun) (termRun t)
 
-notify :: MonadIO m => String -> m ()
-notify = io . runInput (Run "xmessage" ["-file","-"])
+notify :: X.MonadIO m => String -> m ()
+notify = X.io . runInput (Run "xmessage" ["-file","-"])
 
-identWindow :: Window -> X ()
-identWindow w = io $ runOutput (Run "xprop" ["-id",show w]) >>= notify
+identWindow :: X.Window -> X.X ()
+identWindow w = X.io $ runOutput (Run "xprop" ["-id",show w]) >>= notify
 
 browser :: String
 browser 
   | isExec "uzbl" = "uzbl"
   | otherwise = "firefox"
 
-runBrowser :: Maybe String -> X ()
+runBrowser :: Maybe String -> X.X ()
 runBrowser = run . Run browser . maybeToList
 
-runLogin :: String -> X ()
+runLogin :: String -> X.X ()
 runLogin h = runTerm $ term{ termTitle = Just h, termRun = Just (RunShell ("ssh " ++ h)) }
 
 startups :: [(String, Run)]
@@ -98,7 +99,7 @@ programs = startups
     | isExec p = [(p, Run p a)]
     | otherwise = []
 
-mixerSet :: MonadIO m => Ordering -> Int -> m ()
+mixerSet :: X.MonadIO m => Ordering -> Int -> m ()
 mixerSet d n 
   | osName == "Linux" = run $ Run "amixer" ["-q","-D","main","set",if hostHome then "Wave" else "Master","playback",show n ++ dirSign d]
   | osName == "FreeBSD" = run $ Run "/usr/sbin/mixer" [if hostName == "druid" then "ogain" else "vol",dirSign d ++ show n]
