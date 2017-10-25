@@ -17,7 +17,8 @@ import           Server
 import           Dzen
 
 fontSize :: Int
-fontSize = 8
+fontSize | hdpi      = 12
+         | otherwise = 8
 
 deskChars :: Int
 deskChars = pagerDeskWidth `div` 5

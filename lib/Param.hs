@@ -2,6 +2,7 @@
 module Param
   ( osName
   , hostName, hostHome
+  , hdpi
   , home
   , Desktop, desktops
   , iconDesktop, desktopsAll
@@ -38,6 +39,9 @@ hostName = takeWhile (/= '.') $ nodeName systemID
 hostHome :: Bool
 hostHome = hostName == "datura"
 
+hdpi :: Bool
+hdpi = "scclin" `isPrefixOf` hostName
+
 home :: String
 home = unsafeDupablePerformIO $ getEnv "HOME"
 
@@ -63,7 +67,8 @@ instance Read Desktop where
     ++ map (first Desktop) (readsPrec n s)
 
 topHeight :: Int
-topHeight = 50
+topHeight | hdpi      = 80
+          | otherwise = 50
 
 wmod :: X.KeyMask
 wmod = X.mod4Mask -- mod1Mask
