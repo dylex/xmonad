@@ -150,8 +150,8 @@ rotUp' (W.Stack f u [])    = W.Stack m (f:u') [] where (u',m) = initLast u
 rotUp' (W.Stack f u (t:d)) = W.Stack t (f:u') (d++:m) where (u',m) = initLast u
 
 windowHintAdjust :: Window -> X ()
-windowHintAdjust w = withDisplay $ \dpy -> io $ do
-  wa <- getWindowAttributes dpy w
+windowHintAdjust w = withDisplay $ \dpy ->
+  withWindowAttributes dpy w $ \wa -> io $ do
   sh <- getWMNormalHints dpy w
   -- ideally would like width and height hints, but not included in SizeHints...
   resizeWindow dpy w `uncurry` 
