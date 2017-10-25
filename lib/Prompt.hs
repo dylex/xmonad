@@ -203,25 +203,25 @@ ops defw = do
     xd f = f . fromMaybe defd . fmap show
     xdw f dw = xw (xd f $ fmap headWord dw) $ tailWords =<< dw
   return $ switchCmd
-    [o_ "refresh"	refresh
-    ,o_ "rescreen"	rescreen
-    ,od "view"		$ windows . W.view
-    ,ow "manage"	manage
-    ,ow "unmanage"	unmanage
-    ,ow "kill"		killWindow
-    ,ow "hide"		hide
-    ,ow "icon"		$ windows . W.shiftWin (show iconDesktop)
-    ,ow "reveal"	reveal
-    ,ow "focus"		$ windows . W.focusWindow
-    ,ow "xfocus"	setFocusX
-    ,ow "float"		float
-    ,ow "sink"		$ windows . W.sink
-    ,ow "switch"	switchWindow
-    ,odw "shift"	$ \i -> windows . W.shiftWin i
-    ,ow "stick"		$ windows . stickWindow
-    ,odw "copy"		$ \i w -> windows $ XCW.copyWindow w i
-    ,ow "remove"	$ windows . W.modify Nothing . W.filter . (/=)
-    ,ow "ident"		identWindow
+    [o_ "refresh"       refresh
+    ,o_ "rescreen"      rescreen
+    ,od "view"          $ windows . W.view
+    ,ow "manage"        manage
+    ,ow "unmanage"      unmanage
+    ,ow "kill"          killWindow
+    ,ow "hide"          hide
+    ,ow "icon"          $ windows . W.shiftWin (show iconDesktop)
+    ,ow "reveal"        reveal
+    ,ow "focus"         $ windows . W.focusWindow
+    ,ow "xfocus"        setFocusX
+    ,ow "float"         float
+    ,ow "sink"          $ windows . W.sink
+    ,ow "switch"        switchWindow
+    ,odw "shift"        $ \i -> windows . W.shiftWin i
+    ,ow "stick"         $ windows . stickWindow
+    ,odw "copy"         $ \i w -> windows $ XCW.copyWindow w i
+    ,ow "remove"        $ windows . W.modify Nothing . W.filter . (/=)
+    ,ow "ident"         identWindow
     ]
 
 promptOp :: X ()

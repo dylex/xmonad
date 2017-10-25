@@ -65,7 +65,7 @@ deskInfo set d = wins >=. \(wm:wl) -> (line True wm, map (line False) wl) where
     ++ "pa"^/show (i*pagerDeskWidth)
     ++ (if winFloat w then "bg"^/fcol else "ib"^/"1")
     ++ "fg"^/(if cur then if winPos w == Down then "#C0C080" else "#FFFFC0"
-		     else if winPos w == Down then "#8080C0" else "#C0C0FF")
+                     else if winPos w == Down then "#8080C0" else "#C0C0FF")
     ++ dzenClickArea 1 cmd [arg]
       (winInfo w deskChars)
     ++ (if winFloat w then "bg"^/"" else "ib"^/"0")

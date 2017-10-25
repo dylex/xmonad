@@ -26,10 +26,10 @@ selectionEventHook (PropertyEvent{ ev_window = ew, ev_atom = ea, ev_propstate = 
   if ew == root && ea == sa
     then io (readIORef selectionAction)
       >>= maybe (return (All True)) (\f -> do
-	io $ writeIORef selectionAction Nothing
-	s <- withDisplay $ \d -> io $ getWindowProperty8 d sa root
-	maybe nop (f . map castCCharToChar) s
-	return (All False))
+        io $ writeIORef selectionAction Nothing
+        s <- withDisplay $ \d -> io $ getWindowProperty8 d sa root
+        maybe nop (f . map castCCharToChar) s
+        return (All False))
     else return (All True)
 selectionEventHook _ = return (All True)
 

@@ -124,8 +124,8 @@ instance (LayoutClass lm Window, LayoutClass ls Window) => LayoutClass (SplitLay
     (ss,sm) <- partitionStackM assignWindow (splitSubFocus l) (splitMainFocus l) s
     let
       (rm, rs) 
-	| isNothing ss = (r', r')
-	| otherwise = splitRect (splitDirection l, splitSize l) r'
+        | isNothing ss = (r', r')
+        | otherwise = splitRect (splitDirection l, splitSize l) r'
     (wrm, lm) <- runLayout (Workspace (wid ++ "M") (splitMain l) sm) rm
     (wrs, ls) <- runLayout (Workspace (wid ++ "S") (splitSub  l) ss) rs
     return (map (second $ shrinkBy 1) $ wrm ++ wrs, Just l

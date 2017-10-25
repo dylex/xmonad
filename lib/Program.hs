@@ -60,8 +60,8 @@ startups = l pagerWidth where
   l = lif (isExec "xeyes")
       (push (topHeight+1) $ \x -> ("xeyes", nice ["xeyes","-distance","-geometry",show topHeight++"x"++show topHeight++x++"+-1"]))
     $ (if isExec "stripchart"
-	then geom (if hdpi then 600 else 360) $ \g -> ("stripchart", nice ["-8","stripchart","--geometry",g])
-	else geom (if hdpi then 240 else 120) $ \g -> ("xload", nice ["-8","xload","-bg","#3050A0","-fg","#F0E000","-nolabel","-update","30","-geometry",g]))
+        then geom (if hdpi then 600 else 360) $ \g -> ("stripchart", nice ["-8","stripchart","--geometry",g])
+        else geom (if hdpi then 240 else 120) $ \g -> ("xload", nice ["-8","xload","-bg","#3050A0","-fg","#F0E000","-nolabel","-update","30","-geometry",g]))
     $ lif (isExec "xdaliclock")
       (geom (if hdpi then 370 else 220) $ \g -> ("xdaliclock", nice ["-5","xdaliclock","-transparent","-hex","-noseconds","-fg",colorRootFG,"-fn",if hdpi then "-*-courier-bold-r-*-*-100-*-*-*-*-*-*-*" else "-*-luxi sans-medium-r-*-*-*-400-*-*-*-*-iso8859-1","-geometry",g]))
     $ lif hostHome
@@ -102,7 +102,7 @@ programs = startups
     | otherwise = []
 
 mixerSet :: X.MonadIO m => Ordering -> Int -> m ()
-mixerSet d n 
+mixerSet d n
   | osName == "Linux" = run $ Run "amixer" ["-q","-D","main","set",if hostHome then "Wave" else "Master","playback",show n ++ dirSign d]
   | osName == "FreeBSD" = run $ Run "/usr/sbin/mixer" [if hostName == "druid" then "ogain" else "vol",dirSign d ++ show n]
   | otherwise = nop
