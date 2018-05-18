@@ -38,6 +38,5 @@ withSelection a = do
   dpy <- asks display
   root <- asks theRoot
   clp <- getSelectionAtom
-  io $ do
-  writeIORef selectionAction (Just a)
-  xConvertSelection dpy pRIMARY sTRING clp root currentTime
+  io $ writeIORef selectionAction (Just a)
+  io $ xConvertSelection dpy pRIMARY sTRING clp root currentTime

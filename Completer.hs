@@ -17,16 +17,17 @@ module Completer
   ) where
 
 import Prelude hiding (Word)
+
+import           Control.Applicative (Applicative(..))
+import           Control.Monad ((>=>), liftM, liftM2)
+import           Data.Char (isSpace)
+import           Data.List (nub, find)
+import qualified Data.Map as Map
+import           Data.Maybe (mapMaybe, maybeToList)
+import qualified Data.Set as Set
+
 import XMonad
 import XMonad.Prompt
-import Control.Applicative (Applicative(..))
-import Control.Monad
-import Data.Char
-import Data.List
-import qualified Data.Map as Map
-import Data.Maybe
-import Data.Monoid
-import qualified Data.Set as Set
 import Util
 
 with :: b -> a -> (a, b)

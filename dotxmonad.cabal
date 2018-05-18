@@ -1,0 +1,42 @@
+name:           dotxmonad
+version:        0
+description:    My xmonad config
+homepage:       https://github.com/dylex/xmonad
+author:         Dylan Simon
+maintainer:     dylan@dylex.net
+copyright:      2010-2018
+license:        BSD3
+build-type:     Simple
+cabal-version:  >= 1.24
+
+source-repository head
+  type: git
+  location: https://github.com/dylex/xmonad
+
+executable xmonad
+  default-language: Haskell2010
+  ghc-options: -Wall
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , directory
+    , filepath
+    , mtl
+    , process
+    , unix
+    , X11
+    , xmonad
+    , xmonad-contrib
+  main-is: xmonad.hs
+  other-modules:
+    Completer
+    Dzen
+    Layout
+    Ops
+    Pager
+    Param
+    Program
+    Prompt
+    Selection
+    Server
+    Util

@@ -1,22 +1,24 @@
 {-# LANGUAGE FlexibleContexts #-}
+import           Control.Monad (when)
+import qualified Data.Map as Map
+import           Data.Ratio ((%))
+import           System.Environment (getArgs)
+import           System.Exit (exitWith, ExitCode(ExitSuccess))
+
 import XMonad as X hiding (mouseResizeWindow)
 import qualified XMonad.StackSet as W
 import qualified XMonad.Actions.CopyWindow as XCW
-import XMonad.Actions.CycleWS
-import XMonad.Actions.FlexibleResize
-import XMonad.Actions.FloatKeys
-import XMonad.Hooks.SetWMName (setWMName)
-import XMonad.Layout.Column
-import XMonad.Layout.NoBorders
-import XMonad.Util.Run
-import XMonad.Util.Types
-import XMonad.Util.WindowProperties
-import Control.Monad
-import qualified Data.Map as Map
-import Data.Ratio ((%))
-import System.Environment
-import System.Exit
-import Graphics.X11.ExtraTypes.XF86
+import           XMonad.Actions.CycleWS (toggleWS)
+import           XMonad.Actions.FlexibleResize (mouseResizeWindow)
+import           XMonad.Actions.FloatKeys (keysResizeWindow, keysMoveWindow)
+import           XMonad.Hooks.SetWMName (setWMName)
+import           XMonad.Layout.Column (Column(Column))
+import           XMonad.Layout.NoBorders (lessBorders, Ambiguity(OnlyFloat))
+import           XMonad.Util.Run (runProcessWithInput)
+import           XMonad.Util.Types (Direction2D(L))
+import           XMonad.Util.WindowProperties (Property(Title), propertyToQuery)
+import           Graphics.X11.ExtraTypes.XF86
+
 import Param
 import Ops
 import Layout
