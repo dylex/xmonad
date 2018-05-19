@@ -13,7 +13,8 @@ import           XMonad.Actions.FlexibleResize (mouseResizeWindow)
 import           XMonad.Actions.FloatKeys (keysResizeWindow, keysMoveWindow)
 import           XMonad.Hooks.SetWMName (setWMName)
 import           XMonad.Layout.Column (Column(Column))
-import           XMonad.Layout.NoBorders (lessBorders, Ambiguity(OnlyFloat))
+import           XMonad.Layout.LayoutModifier (ModifiedLayout)
+import           XMonad.Layout.NoBorders (ConfigurableBorder, lessBorders, Ambiguity(OnlyFloat))
 import           XMonad.Util.Run (runProcessWithInput)
 import           XMonad.Util.Types (Direction2D(L))
 import           XMonad.Util.WindowProperties (Property(Title), propertyToQuery)
@@ -31,6 +32,7 @@ import Selection
 isStuck :: Property
 isStuck = Title "stuck term"
 
+layout :: ModifiedLayout (ConfigurableBorder Ambiguity) (SplitLayout (Choose Full (Choose Tall Column)) Column) Window
 layout = lessBorders OnlyFloat $ splitLayout (L, 8+if hdpi then 100*7 else 80*6) isStuck lmain lstuck
   where
   lmain = Full ||| Tall 1 (1%32) (1%2) ||| Column 1
@@ -60,7 +62,7 @@ bind =
   , ((wmod .|. shiftMask,   xK_p),      promptClipID)
   -- xK_y
   , ((wmod,                 xK_f),      runBrowser Nothing)
-  , ((wmod .|. shiftMask,   xK_f),      withSelection $ runBrowser . Just)
+  , ((wmod .|. shiftMask,   xK_f),      promptBrowser)
   , ((wmod .|. shiftMask,   xK_g),      withSelection $ \u -> run $ Run "elinks" ["-remote",u])
   , ((wmod,                 xK_c),      windows (W.swapUp . W.focusDown))
   , ((wmod .|. shiftMask,   xK_c),      promptRun False)
@@ -194,7 +196,7 @@ main = do
   args <- getArgs
   let new = "--resume" `notElem` args
   pagerLog <- pagerStart
-  xmonad def -- TODO: use launch, restart
+  launch def -- TODO: use launch, restart
     { normalBorderColor = "#6060A0"
     , focusedBorderColor = "#E0E0A0"
     , X.terminal = Program.terminal term

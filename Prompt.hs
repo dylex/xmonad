@@ -6,20 +6,23 @@ module Prompt
   , promptTmux
   , promptOp, promptWindowOp
   , promptClipID
+  , promptBrowser
   ) where
+
+import           Control.Exception (catch, IOException)
+import           Control.Monad (join)
+import           Data.List (isPrefixOf)
+import           Data.Maybe (fromMaybe, fromJust, mapMaybe)
+import qualified Data.Set as Set
+import           System.Directory (getDirectoryContents)
+import           System.FilePath ((</>), splitFileName, splitExtensions, getSearchPath)
 
 import XMonad
 import XMonad.Prompt
 import qualified XMonad.StackSet as W
 import qualified XMonad.Actions.CopyWindow as XCW
-import XMonad.Util.NamedWindows
-import Control.Exception (catch, IOException)
-import Control.Monad
-import Data.List
-import Data.Maybe
-import qualified Data.Set as Set
-import System.Directory
-import System.FilePath
+import           XMonad.Util.NamedWindows (NamedWindow, unName, getName)
+
 import Util
 import Param
 import Ops
@@ -141,7 +144,7 @@ promptTmux = do
 
 
 loginHost :: IO CS
-loginHost = suggest . oneOf =.< mapMaybe hostLine . lines =.< readFile' (home ++ "/.ssh/config") where
+loginHost = suggest . oneOf =.< mapMaybe hostLine . lines =.< readFile' (home </> ".ssh/config") where
   hostLine s 
     | ["Host",h] <- words s
     , '*' `notElem` h && '?' `notElem` h = Just h
@@ -241,7 +244,7 @@ runOp (Words _ (Just cc)) = runClosure cc
 
 
 readIDs :: IO [(String,String)]
-readIDs = mapMaybe idLine . lines =.< readFile' (home ++ "/doc/id") where
+readIDs = mapMaybe idLine . lines =.< readFile' (home </> "doc/id") where
   idLine s
     | (i,':':' ':p) <- break (':' ==) s = Just (i,p)
     | otherwise = Nothing
@@ -260,3 +263,14 @@ runClipID i = io $ do
   case filter (isPrefixOf i . fst) ids of
     [(_,s)] | (p:_) <- words s -> runInput (Run "xclip" ["-i","-l","1"]) p
     _ -> nop
+
+
+promptBrowser :: X ()
+promptBrowser = do
+  c <- io $ mapMaybe (conf . splitExtensions) <$> readDir' False (home </> ".hawk")
+  prompt "browser" (suggest $ oneOf c) $ runBrowser . Just
+  where
+  conf (b, ".yaml") = Just b
+  conf (b, ".yml") = Just b
+  conf (b, ".json") = Just b
+  conf _ = Nothing

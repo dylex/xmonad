@@ -1,4 +1,5 @@
 {-# LANGUAGE PatternGuards, MultiParamTypeClasses, TypeSynonymInstances, FlexibleInstances, FlexibleContexts, ScopedTypeVariables, ExistentialQuantification #-}
+{-# LANGUAGE TupleSections #-}
 module Completer
   ( Output(..), outputAs
   , Completer, CS
@@ -30,9 +31,6 @@ import XMonad
 import XMonad.Prompt
 import Util
 
-with :: b -> a -> (a, b)
-with = flip (,)
-
 listToMaybe' :: [x] -> Maybe x
 listToMaybe' [x] = Just x
 listToMaybe' _ = Nothing
@@ -56,7 +54,7 @@ splitWord = splitWith isSpace
 type Completion a = (a, String)
 
 entire :: a -> Completion a
-entire = with ""
+entire = (, "")
 
 entires :: [Completion a] -> [a]
 entires = mapMaybe f where
@@ -145,7 +143,7 @@ instance MonadState String Completer where
   put s = Completer $ \_ -> return [((),s)]
 
 instance MonadIO Completer where
-  liftIO f = Completer $ \s -> f >.= return . with s
+  liftIO f = Completer $ \s -> f >.= return . (, s)
 
 whenNull :: [a] -> Completer a -> Completer a
 whenNull d c = Completer $ \s ->
@@ -205,7 +203,7 @@ instance (Output a, Output b) => Output (Words a b) where
 
 -- works for completions and reductions, but only with on spaces
 word1 :: Output a => Completer a -> Completer (Word a)
-word1 c = Completer $ \s -> maybe (runCompleter (fmap Frag c) s) (\(w,r) -> map (with r . Word) =.< completed c w) $ splitWord s
+word1 c = Completer $ \s -> maybe (runCompleter (fmap Frag c) s) (\(w,r) -> map ((, r) . Word) =.< completed c w) $ splitWord s
 
 -- only works for reductions, but with multiple words
 word :: Completer a -> Completer (Word a)

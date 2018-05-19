@@ -46,6 +46,7 @@ identWindow w = X.io $ runOutput (Run "xprop" ["-id",show w]) >>= notify
 
 browser :: String
 browser 
+  | isExec "hawk" = "hawk"
   | isExec "uzbl" = "uzbl"
   | otherwise = "firefox"
 

@@ -1,7 +1,8 @@
 {-# OPTIONS -fno-warn-name-shadowing #-}
 {-# LANGUAGE TypeSynonymInstances, MultiParamTypeClasses, FlexibleContexts, DeriveDataTypeable, PatternGuards #-}
 module Layout
-  ( splitLayout
+  ( SplitLayout
+  , splitLayout
   , SplitMessage(..)
   ) where
 
