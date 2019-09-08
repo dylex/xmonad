@@ -14,7 +14,7 @@ import           XMonad.Actions.FloatKeys (keysResizeWindow, keysMoveWindow)
 import           XMonad.Hooks.SetWMName (setWMName)
 import           XMonad.Layout.Column (Column(Column))
 import           XMonad.Layout.LayoutModifier (ModifiedLayout)
-import           XMonad.Layout.NoBorders (ConfigurableBorder, lessBorders, Ambiguity(OnlyFloat))
+import           XMonad.Layout.NoBorders (ConfigurableBorder, lessBorders, Ambiguity(OnlyLayoutFloat))
 import           XMonad.Util.Run (runProcessWithInput)
 import           XMonad.Util.Types (Direction2D(L))
 import           XMonad.Util.WindowProperties (Property(Title), propertyToQuery)
@@ -33,7 +33,7 @@ isStuck :: Property
 isStuck = Title "stuck term"
 
 layout :: ModifiedLayout (ConfigurableBorder Ambiguity) (SplitLayout (Choose Full (Choose Tall Column)) Column) Window
-layout = lessBorders OnlyFloat $ splitLayout (L, 8+if hdpi then 100*7 else 80*6) isStuck lmain lstuck
+layout = lessBorders OnlyLayoutFloat $ splitLayout (L, 8+if hdpi then 100*7 else 80*6) isStuck lmain lstuck
   where
   lmain = Full ||| Tall 1 (1%32) (1%2) ||| Column 1
   lstuck = Column 1

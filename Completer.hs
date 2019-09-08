@@ -117,6 +117,9 @@ pureCompleter f = Completer $ return . f
 pureCompleter1 :: (String -> Completion a) -> Completer a
 pureCompleter1 f = pureCompleter $ return . f
 
+instance Semigroup (Completer a) where
+  (<>) = liftC2 (<>)
+
 instance Monoid (Completer a) where
   mempty = pureCompleter $ const []
   mappend = liftC2 mappend
