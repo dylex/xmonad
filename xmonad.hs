@@ -44,7 +44,7 @@ iconLayout = Tall 1 (1%32) (1%2) -- FIXME
 manager :: ManageHook
 manager = composeAll
   [ isElem title ["Stripchart","xeyes","xload","xdaliclock","Dali Clock","xrtail"] <||> isElem className ["Gomp"] --> doIgnore
-  , isElem className ["feh","Gimp","xmag"] <||> isElem title ["Event Tester","MPlayer","unblend"] --> doFloat
+  , isElem className ["feh","Gimp","xmag","mpv"] <||> isElem title ["Event Tester","MPlayer","unblend"] --> doFloat
   , propertyToQuery isStuck --> ask >>= doF . stickWindow
   , title =? "xconsole" --> doShift (show (pred maxBound :: Desktop))
   ]
