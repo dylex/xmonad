@@ -11,10 +11,11 @@ import qualified XMonad.Actions.CopyWindow as XCW
 import           XMonad.Actions.CycleWS (toggleWS)
 import           XMonad.Actions.FlexibleResize (mouseResizeWindow)
 import           XMonad.Actions.FloatKeys (keysResizeWindow, keysMoveWindow)
+import           XMonad.Actions.NoBorders (toggleBorder)
 import           XMonad.Hooks.SetWMName (setWMName)
 import           XMonad.Layout.Column (Column(Column))
 import           XMonad.Layout.LayoutModifier (ModifiedLayout)
-import           XMonad.Layout.NoBorders (ConfigurableBorder, lessBorders, Ambiguity(OnlyLayoutFloat))
+import           XMonad.Layout.NoBorders (ConfigurableBorder, lessBorders, Ambiguity(OnlyScreenFloat))
 import           XMonad.Util.Run (runProcessWithInput)
 import           XMonad.Util.Types (Direction2D(L))
 import           XMonad.Util.WindowProperties (Property(Title), propertyToQuery)
@@ -33,7 +34,7 @@ isStuck :: Property
 isStuck = Title "stuck term"
 
 layout :: ModifiedLayout (ConfigurableBorder Ambiguity) (SplitLayout (Choose Full (Choose Tall Column)) Column) Window
-layout = lessBorders OnlyLayoutFloat $ splitLayout (L, 8+if hdpi then 100*7 else 80*6) isStuck lmain lstuck
+layout = lessBorders OnlyScreenFloat $ splitLayout (L, 8+if hdpi then 100*7 else 80*6) isStuck lmain lstuck
   where
   lmain = Full ||| Tall 1 (1%32) (1%2) ||| Column 1
   lstuck = Column 1
@@ -44,7 +45,7 @@ iconLayout = Tall 1 (1%32) (1%2) -- FIXME
 manager :: ManageHook
 manager = composeAll
   [ isElem title ["Stripchart","xeyes","xload","xdaliclock","Dali Clock","xrtail"] <||> isElem className ["Gomp"] --> doIgnore
-  , isElem className ["feh","Gimp","xmag","mpv"] <||> isElem title ["Event Tester","MPlayer","unblend"] --> doFloat
+  , isElem title ["Event Tester","MPlayer","unblend"] <||> isElem className ["feh","Gimp","xmag","mpv"] --> doFloat
   , propertyToQuery isStuck --> ask >>= doF . stickWindow
   , title =? "xconsole" --> doShift (show (pred maxBound :: Desktop))
   ]
@@ -105,6 +106,7 @@ bind =
   -- k
   , ((wmod,                 xK_x),      kill)
   , ((wmod,                 xK_b),      run $ RunShell "xbg && [ -p HOME/.xtail ] && touch HOME/.xtail")
+  , ((wmod .|. shiftMask,   xK_b),      withFocused toggleBorder)
   , ((wmod,                 xK_m),      withFocused floatAdjust)
   , ((wmod .|. shiftMask,   xK_m),      withFocused (windows . W.sink))
   , ((wmod,                 xK_w),      windows W.shiftMaster)
@@ -194,7 +196,7 @@ startup new = do
 main :: IO ()
 main = do
   args <- getArgs
-  let new = "--resume" `notElem` args
+  let new = "--resume" `notElem` args -- FIXME this is no longer used
   pagerLog <- pagerStart
   launch def -- TODO: use launch, restart
     { normalBorderColor = "#6060A0"
@@ -212,6 +214,7 @@ main = do
     , startupHook = do
         dpy <- asks display
         root <- asks theRoot
+        -- xs <- get -- extensibleState on restart?
         -- add propertyNotifyMask for rootw ... for selection
         io $ selectInput dpy root $ substructureRedirectMask .|. substructureNotifyMask
                                 .|. enterWindowMask .|. leaveWindowMask .|. structureNotifyMask
