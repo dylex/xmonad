@@ -138,8 +138,10 @@ instance Applicative Completer where
 
 instance Monad Completer where
   return = pure
-  fail = Completer . const . fail -- Completer $ const $ return []
   m >>= f = Completer $ runCompleter m >=> concatMapM (uncurry $ runCompleter . f)
+
+instance MonadFail Completer where
+  fail = Completer . const . fail -- Completer $ const $ return []
 
 instance MonadState String Completer where
   get = Completer $ \s -> return [(s,s)]
