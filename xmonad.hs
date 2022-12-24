@@ -198,6 +198,7 @@ main = do
   args <- getArgs
   let new = "--resume" `notElem` args -- FIXME this is no longer used
   pagerLog <- pagerStart
+  dirs <- getDirectories
   launch def -- TODO: use launch, restart
     { normalBorderColor = "#6060A0"
     , focusedBorderColor = "#E0E0A0"
@@ -225,6 +226,7 @@ main = do
     , focusFollowsMouse = True
     , clickJustFocuses = False
     }
+    dirs
 
 {- TODO:
  -   main layouts
