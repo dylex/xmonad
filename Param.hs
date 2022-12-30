@@ -37,10 +37,10 @@ hostName :: String
 hostName = takeWhile (/= '.') $ nodeName systemID
 
 hostHome :: Bool
-hostHome = hostName == "datura"
+hostHome = hostName `elem` ["datura", "talula"]
 
 hdpi :: Bool
-hdpi = "scclin" `isPrefixOf` hostName
+hdpi = hostName `elem` ["talula", "scclin"]
 
 home :: String
 home = unsafeDupablePerformIO $ getEnv "HOME"
@@ -67,7 +67,8 @@ instance Read Desktop where
     ++ map (first Desktop) (readsPrec n s)
 
 topHeight :: Int
-topHeight | hdpi      = 80
+topHeight | hdpi && hostHome = 90
+          | hdpi      = 80
           | otherwise = 50
 
 wmod :: X.KeyMask
@@ -79,7 +80,8 @@ colorRootFG :: COLOR
 colorRootFG = "#FFFFBB"
 
 pagerDeskWidth :: Int
-pagerDeskWidth | hdpi      = 140
+pagerDeskWidth | hdpi && hostHome = 150
+               | hdpi      = 140
                | otherwise = 75
 
 pagerWidth :: Int

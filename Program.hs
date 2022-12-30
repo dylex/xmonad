@@ -61,12 +61,12 @@ startups = l pagerWidth where
   l = lif (isExec "xeyes")
       (push (topHeight+1) $ \x -> ("xeyes", nice ["xeyes","-distance","-geometry",show topHeight++"x"++show topHeight++x++"+-1"]))
     $ (if isExec "stripchart"
-        then geom (if hdpi then 600 else 360) $ \g -> ("stripchart", nice ["-8","stripchart","--geometry",g])
+        then geom (if hdpi then 720 else 360) $ \g -> ("stripchart", nice ["-8","stripchart","--geometry",g])
         else geom (if hdpi then 240 else 120) $ \g -> ("xload", nice ["-8","xload","-bg","#3050A0","-fg","#F0E000","-nolabel","-update","30","-geometry",g]))
     $ lif (isExec "xdaliclock")
-      (geom (if hdpi then 370 else 220) $ \g -> ("xdaliclock", nice ["-5","xdaliclock","-transparent","-hex","-noseconds","-fg",colorRootFG,"-fn",if hdpi then "-*-courier-bold-r-*-*-100-*-*-*-*-*-*-*" else "-*-luxi sans-medium-r-*-*-*-400-*-*-*-*-iso8859-1","-geometry",g]))
+      (push (if hdpi then 300 else 220) $ \x -> ("xdaliclock", nice ["-5","xdaliclock","-transparent","-hex","-noseconds","-fg",colorRootFG,"-fn",if hdpi then "builtin1" else "-*-luxi sans-medium-r-*-*-*-400-*-*-*-*-iso8859-1","-geometry","300x63" ++ x ++ "+10"]))
     $ lif hostHome
-      (push (80*5) $ \x -> ("xrtail", nice ["-5","xrtail","-geom","80x7" ++ x ++ "+0","-fn","5x8","-fg",colorRootFG,home</>".xrw"]))
+      (push (80*5) $ \x -> ("xrtail", nice ["-5","xrtail","-geom","80x7" ++ x ++ "+0","-fn",if hdpi then "9x15bold" else "5x8","-fg",colorRootFG,home</>".xrw"]))
     $ const
       -- FIXME -fn:
     [ ("stuck term", Run "xterm" ["-title","stuck term","-fn","-dylex-terminal-medium-r-*-*-"++stsz++"-*","-fb","-dylex-terminal-bold-r-*-*-"++stsz++"-*"])
@@ -79,7 +79,8 @@ startups = l pagerWidth where
   lif False _ r x = r x
   lif True f r x = f r x
   nice = Run "nice" 
-  stsz | hdpi      = "13"
+  stsz | hdpi && hostHome = "20"
+       | hdpi      = "13"
        | otherwise = "10"
 
 programs :: [(String, Run)]

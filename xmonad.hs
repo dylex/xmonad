@@ -34,7 +34,7 @@ isStuck :: Property
 isStuck = Title "stuck term"
 
 layout :: ModifiedLayout (ConfigurableBorder Ambiguity) (SplitLayout (Choose Full (Choose Tall Column)) Column) Window
-layout = lessBorders OnlyScreenFloat $ splitLayout (L, 8+if hdpi then 100*7 else 80*6) isStuck lmain lstuck
+layout = lessBorders OnlyScreenFloat $ splitLayout (L, 8+if hdpi then if hostHome then 80*10 else 100*7 else 80*6) isStuck lmain lstuck
   where
   lmain = Full ||| Tall 1 (1%32) (1%2) ||| Column 1
   lstuck = Column 1

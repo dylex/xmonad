@@ -77,6 +77,7 @@ xpConfig = def
   , bgHLight = "#000000"
   , fgHLight = "#ffffcc"
   , borderColor = "#0000cc"
+  , height = 26
   , showCompletionOnTab = False
   }
 
